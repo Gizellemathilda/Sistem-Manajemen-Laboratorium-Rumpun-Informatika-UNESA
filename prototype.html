@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIM-LAB — Sistem Informasi Manajemen Laboratorium</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  [data-lucide], .lucide { width: 16px; height: 16px; stroke-width: 2; vertical-align: middle; }
+  .nav-item .nav-icon [data-lucide] { width: 18px; height: 18px; }
+  .stat-icon [data-lucide] { width: 22px; height: 22px; }
+  .notif-bell [data-lucide] { width: 18px; height: 18px; }
+  .empty-state .icon [data-lucide] { width: 40px; height: 40px; }
+  .btn-google { background: #fff !important; color: #1f2937 !important; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 11px 14px; font-weight: 600; }
+  .btn-google:hover { background: #f8faff !important; border-color: var(--blue); }
+  .btn-google svg.g-logo { width: 18px; height: 18px; }
+  .login-divider { display: flex; align-items: center; gap: 12px; margin: 18px 0; color: var(--text-muted); font-size: 12px; }
+  .login-divider::before, .login-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+</style>
+<style>
+  :root {
+    --navy: #0f1f3d; --navy-light: #1a3260; --navy-mid: #243a6e;
+    --blue: #2563eb; --blue-light: #3b82f6;
+    --green: #059669; --green-light: #10b981;
+    --amber: #d97706; --red: #dc2626; --red-light: #ef4444;
+    --bg: #f1f5fb; --bg-card: #ffffff;
+    --text: #0f1f3d; --text-muted: #64748b; --border: #e2e8f0;
+    --sidebar-w: 260px; --radius: 10px;
+    --shadow: 0 2px 16px rgba(15,31,61,0.08);
+    --shadow-lg: 0 8px 32px rgba(15,31,61,0.14);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* LOGIN */
+  #login-screen { display: flex; min-height: 100vh; background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #1e40af 100%); }
+  .login-left { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 60px 80px; color: #fff; }
+  .login-brand { display: flex; align-items: center; gap: 14px; margin-bottom: 48px; }
+  .login-brand .logo-box { width: 52px; height: 52px; background: var(--green-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; font-weight: 700; }
+  .login-brand span { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .login-brand small { display: block; font-size: 11px; opacity: .6; font-weight: 400; margin-top: 2px; letter-spacing: .5px; text-transform: uppercase; }
+  .login-tagline { font-size: 42px; font-weight: 700; line-height: 1.15; margin-bottom: 20px; letter-spacing: -1px; }
+  .login-tagline span { color: var(--green-light); }
+  .login-desc { font-size: 15px; opacity: .7; line-height: 1.7; max-width: 400px; }
+  .login-features { margin-top: 40px; display: flex; flex-direction: column; gap: 12px; }
+  .login-features .feat { display: flex; align-items: center; gap: 10px; font-size: 13px; opacity: .8; }
+  .login-features .feat .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green-light); flex-shrink: 0; }
+  .login-right { width: 480px; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 40px; }
+  .login-card { width: 100%; max-width: 380px; }
+  .login-card h2 { font-size: 26px; font-weight: 700; margin-bottom: 6px; color: var(--navy); }
+  .login-card p { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
+  .form-group { margin-bottom: 18px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px 14px; border: 2px solid var(--border); border-radius: var(--radius); font-family: inherit; font-size: 14px; color: var(--text); background: #fff; outline: none; transition: border-color .2s; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--blue); }
+  .form-group select { cursor: pointer; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 11px 20px; border-radius: var(--radius); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all .2s; }
+  .btn-primary { background: var(--navy); color: #fff; } .btn-primary:hover { background: var(--navy-light); }
+  .btn-success { background: var(--green); color: #fff; } .btn-success:hover { background: var(--green-light); }
+  .btn-danger { background: var(--red); color: #fff; } .btn-danger:hover { background: var(--red-light); }
+  .btn-warning { background: var(--amber); color: #fff; }
+  .btn-outline { background: transparent; color: var(--text); border: 2px solid var(--border); }
+  .btn-outline:hover { border-color: var(--navy); background: var(--navy); color: #fff; }
+  .btn-sm { padding: 7px 13px; font-size: 12px; }
+  .btn-full { width: 100%; }
+  .login-demo { margin-top: 28px; padding: 16px; background: #f0f4ff; border-radius: var(--radius); border-left: 3px solid var(--blue); }
+  .login-demo h4 { font-size: 12px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+  .login-demo .cred { font-size: 11.5px; color: var(--text-muted); margin-bottom: 4px; }
+  .login-demo .cred b { color: var(--text); }
+  .login-error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 10px 14px; border-radius: var(--radius); font-size: 13px; margin-bottom: 16px; display: none; }
+
+  /* APP */
+  #app { display: none; }
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar { width: var(--sidebar-w); background: var(--navy); color: #fff; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; z-index: 100; }
+  .sidebar-brand { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .sidebar-brand .logo { display: flex; align-items: center; gap: 10px; }
+  .sidebar-brand .logo-icon { width: 36px; height: 36px; background: var(--green-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; }
+  .sidebar-brand .logo-text { font-size: 16px; font-weight: 700; }
+  .sidebar-brand .logo-sub { font-size: 10px; opacity: .5; margin-top: 1px; }
+  .sidebar-user { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .sidebar-user .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .sidebar-user .user-info { display: flex; align-items: center; gap: 10px; }
+  .sidebar-user .user-name { font-size: 13px; font-weight: 600; }
+  .sidebar-user .user-role { font-size: 11px; opacity: .5; margin-top: 2px; }
+  .sidebar-nav { padding: 16px 12px; flex: 1; }
+  .nav-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: .4; padding: 8px 8px 4px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,.65); cursor: pointer; margin-bottom: 2px; transition: all .15s; user-select: none; }
+  .nav-item:hover { background: rgba(255,255,255,.07); color: #fff; }
+  .nav-item.active { background: var(--blue); color: #fff; }
+  .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+  .nav-badge { margin-left: auto; background: var(--red); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 20px; font-weight: 700; }
+  .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,.08); }
+  .logout-btn { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,.5); cursor: pointer; font-size: 13px; }
+  .logout-btn:hover { color: #fff; }
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+  .topbar { height: 64px; background: #fff; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; position: sticky; top: 0; z-index: 90; }
+  .topbar-title { font-size: 18px; font-weight: 700; color: var(--navy); }
+  .topbar-actions { display: flex; align-items: center; gap: 12px; }
+  .notif-bell { width: 36px; height: 36px; border-radius: 50%; background: var(--bg); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; position: relative; }
+  .notif-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); border: 2px solid #fff; }
+  .content { padding: 28px; }
+
+  .card { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--navy); }
+  .grid { display: grid; gap: 20px; }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+  .stat-card { background: var(--bg-card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); display: flex; align-items: flex-start; gap: 16px; }
+  .stat-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .stat-icon.blue { background: #eff6ff; } .stat-icon.green { background: #f0fdf4; }
+  .stat-icon.amber { background: #fffbeb; } .stat-icon.red { background: #fef2f2; }
+  .stat-value { font-size: 28px; font-weight: 700; color: var(--navy); line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--bg); padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); border-bottom: 2px solid var(--border); }
+  td { padding: 12px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8faff; }
+
+  .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-amber { background: #fef3c7; color: #92400e; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-gray { background: #f1f5f9; color: #475569; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(15,31,61,.5); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: #fff; border-radius: 14px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); transform: translateY(20px); transition: transform .2s; }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-header h3 { font-size: 16px; font-weight: 700; }
+  .modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); line-height: 1; }
+  .modal-body { padding: 20px 24px; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+  .filter-bar { display: flex; gap: 10px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .search-input { padding: 9px 14px; border: 2px solid var(--border); border-radius: var(--radius); font-family: inherit; font-size: 13px; outline: none; min-width: 220px; }
+  .search-input:focus { border-color: var(--blue); }
+
+  .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
+  .toast { background: var(--navy); color: #fff; padding: 12px 18px; border-radius: var(--radius); font-size: 13px; font-weight: 500; box-shadow: var(--shadow-lg); animation: slideIn .3s ease; max-width: 320px; }
+  .toast.success { background: var(--green); } .toast.error { background: var(--red); } .toast.warning { background: var(--amber); }
+  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  .mb-4 { margin-bottom: 16px; } .mb-6 { margin-bottom: 24px; } .mt-4 { margin-top: 16px; }
+  .text-muted { color: var(--text-muted); font-size: 13px; }
+  .page-heading { margin-bottom: 24px; }
+  .page-heading h1 { font-size: 22px; font-weight: 700; color: var(--navy); }
+  .page-heading p { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+  .notif-panel { position: fixed; top: 64px; right: 20px; width: 320px; background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-lg); z-index: 200; border: 1px solid var(--border); display: none; max-height: 400px; overflow-y: auto; }
+  .notif-panel.open { display: block; }
+  .notif-panel-header { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 700; }
+  .notif-item { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .notif-item .notif-title { font-size: 13px; font-weight: 600; }
+  .notif-item .notif-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .notif-item .notif-desc { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+  @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .main { margin-left: 0; } .grid-4, .grid-3 { grid-template-columns: repeat(2, 1fr); } .grid-2 { grid-template-columns: 1fr; } .login-left { display: none; } .login-right { width: 100%; } .form-row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-left">
+    <div class="login-brand">
+      <div class="logo-box">S</div>
+      <div><span>SIM-LAB</span><small>Universitas Negeri Surabaya</small></div>
+    </div>
+    <div class="login-tagline">Kelola Laboratorium<br>Lebih <span>Cerdas</span> & Transparan</div>
+    <div class="login-desc">Sistem Informasi Manajemen Laboratorium untuk peminjaman, inventaris, jadwal, dan monitoring perangkat secara real-time.</div>
+    <div class="login-features">
+      <div class="feat"><span class="dot"></span> Booking ruang & alat secara online</div>
+      <div class="feat"><span class="dot"></span> Monitoring inventaris real-time</div>
+      <div class="feat"><span class="dot"></span> Laporan kerusakan & maintenance</div>
+      <div class="feat"><span class="dot"></span> Manajemen nilai & absensi praktikum</div>
+      <div class="feat"><span class="dot"></span> Notifikasi otomatis multi-peran</div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-card">
+      <h2>Masuk ke SIM-LAB</h2>
+      <p>Gunakan akun institusi Anda untuk mengakses sistem.</p>
+      <div class="login-error" id="login-error">Email atau password salah. Silakan coba lagi.</div>
+      <div class="form-group"><label>Email</label><input type="email" id="login-email" value="mahasiswa@unesa.ac.id"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="login-password" value="password123"></div>
+      <div class="form-group"><label>Login sebagai</label>
+        <select id="login-role">
+          <option value="mahasiswa">Mahasiswa</option>
+          <option value="asprak">Asisten Praktikum</option>
+          <option value="aslab">Asisten Lab</option>
+          <option value="dosen">Dosen</option>
+          <option value="admin">Admin (Pengelola)</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="doLogin()" style="margin-top:8px;padding:13px;">Masuk →</button>
+      <div class="login-divider">atau</div>
+      <button class="btn btn-google" onclick="doGoogleLogin()">
+        <svg class="g-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.83z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.83C6.71 7.31 9.14 5.38 12 5.38z"/></svg>
+        Masuk dengan Google
+      </button>
+      <div class="login-demo">
+        <h4>Demo Credentials (password: <b>password123</b>)</h4>
+        <div class="cred">Mahasiswa: <b>mahasiswa@unesa.ac.id</b></div>
+        <div class="cred">Asprak: <b>asprak@unesa.ac.id</b></div>
+        <div class="cred">Aslab: <b>aslab@unesa.ac.id</b></div>
+        <div class="cred">Dosen: <b>dosen@unesa.ac.id</b></div>
+        <div class="cred">Admin: <b>admin@unesa.ac.id</b></div>
+      </div>
+      <div style="margin-top:18px;text-align:center;font-size:13px;color:var(--text-muted)">
+        Belum punya akun?
+        <a href="#" onclick="showRegister();return false;" style="color:var(--blue);font-weight:600;text-decoration:none">Buat akun baru</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div id="register-screen" style="display:none;min-height:100vh;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 60%,#1e40af 100%);padding:40px 20px;">
+  <div style="width:100%;max-width:460px;background:#fff;border-radius:14px;box-shadow:var(--shadow-lg);padding:36px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <div style="width:44px;height:44px;background:var(--green-light);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;">S</div>
+      <div>
+        <div style="font-size:18px;font-weight:700;color:var(--navy)">SIM-LAB</div>
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Buat Akun Baru</div>
+      </div>
+    </div>
+    <h2 style="font-size:22px;font-weight:700;color:var(--navy);margin-bottom:6px;">Daftarkan Akun Anda</h2>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:24px;">Isi data berikut untuk membuat akun baru SIM-LAB.</p>
+
+    <div class="login-error" id="register-error" style="display:none;">Mohon lengkapi semua data dengan benar.</div>
+
+    <div class="form-group"><label>Nama Lengkap</label><input type="text" id="reg-nama" placeholder="Mis. Budi Santoso"></div>
+    <div class="form-group"><label>Email Institusi</label><input type="email" id="reg-email" placeholder="nama@unesa.ac.id"></div>
+    <div class="form-group"><label>NIM / NIP</label><input type="text" id="reg-noid" placeholder="Mis. 24051204200"></div>
+    <div class="form-group"><label>Daftar sebagai</label>
+      <select id="reg-role">
+        <option value="mahasiswa">Mahasiswa</option>
+        <option value="asprak">Asisten Praktikum</option>
+        <option value="aslab">Asisten Lab</option>
+        <option value="dosen">Dosen</option>
+        <option value="admin">Admin (Pengelola)</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Password</label><input type="password" id="reg-password" placeholder="Min. 6 karakter"></div>
+    <div class="form-group"><label>Konfirmasi Password</label><input type="password" id="reg-password2" placeholder="Ulangi password"></div>
+
+    <button class="btn btn-primary btn-full" onclick="doRegister()" style="margin-top:8px;padding:13px;">Daftar Sekarang</button>
+
+    <div style="margin-top:18px;text-align:center;font-size:13px;color:var(--text-muted)">
+      Sudah punya akun?
+      <a href="#" onclick="showLogin();return false;" style="color:var(--blue);font-weight:600;text-decoration:none">Masuk di sini</a>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo">
+          <div class="logo-icon">S</div>
+          <div><div class="logo-text">SIM-LAB</div><div class="logo-sub">UNESA</div></div>
+        </div>
+      </div>
+      <div class="sidebar-user">
+        <div class="user-info">
+          <div class="user-avatar" id="sidebar-avatar">M</div>
+          <div><div class="user-name" id="sidebar-name">—</div><div class="user-role" id="sidebar-role">—</div></div>
+        </div>
+      </div>
+      <div class="sidebar-nav" id="sidebar-nav"></div>
+      <div class="sidebar-footer"><div class="logout-btn" onclick="doLogout()"><i data-lucide="log-out"></i> Keluar</div></div>
+    </nav>
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+        <div class="topbar-actions">
+          <button class="notif-bell" onclick="toggleNotif()"><i data-lucide="bell"></i> <span class="notif-dot" id="notif-dot" style="display:none"></span></button>
+          <div style="font-size:13px;color:var(--text-muted)" id="topbar-date"></div>
+        </div>
+      </div>
+      <div class="notif-panel" id="notif-panel">
+        <div class="notif-panel-header"><i data-lucide="bell"></i> Notifikasi</div>
+        <div id="notif-list"></div>
+      </div>
+      <div class="content" id="content-area"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header"><h3 id="modal-title">Modal</h3><button class="modal-close" onclick="closeModalForce()"><i data-lucide="x"></i></button></div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ═══════════ DATA ═══════════
+const accounts = {
+  mahasiswa: { email: 'mahasiswa@unesa.ac.id', password: 'password123' },
+  asprak:    { email: 'asprak@unesa.ac.id',    password: 'password123' },
+  aslab:     { email: 'aslab@unesa.ac.id',     password: 'password123' },
+  dosen:     { email: 'dosen@unesa.ac.id',     password: 'password123' },
+  admin:     { email: 'admin@unesa.ac.id',     password: 'password123' },
+};
+
+let USERS = [
+  { email: 'mahasiswa@unesa.ac.id', role: 'mahasiswa', name: 'Ata Annisa Azka',     nim: '24051204139', lab: 'RPL' },
+  { email: 'asprak@unesa.ac.id',    role: 'asprak',    name: 'Gizelle Mathilda M.', nim: '24051204146', lab: 'RPL' },
+  { email: 'aslab@unesa.ac.id',     role: 'aslab',     name: 'Rifqi Syawal',        nim: '24051204150', lab: 'AI'  },
+  { email: 'dosen@unesa.ac.id',     role: 'dosen',     name: 'Dr. Siti Rahmawati',  nip: '198501012010122001', lab: 'RPL' },
+  { email: 'admin@unesa.ac.id',     role: 'admin',     name: 'Ir. Budi Santoso',    nip: '197003011998031001', lab: 'Semua Lab' },
+];
+
+let state = {
+  user: null,
+  currentPage: 'dashboard',
+  users: [
+    { id: 1, nama: 'Ata Annisa Azka',     email: 'mahasiswa@unesa.ac.id', role: 'mahasiswa', noid: '24051204139',       status: 'Aktif' },
+    { id: 2, nama: 'Gizelle Mathilda M.', email: 'asprak@unesa.ac.id',    role: 'asprak',    noid: '24051204146',       status: 'Aktif' },
+    { id: 3, nama: 'Rifqi Syawal',        email: 'aslab@unesa.ac.id',     role: 'aslab',     noid: '24051204150',       status: 'Aktif' },
+    { id: 4, nama: 'Dr. Siti Rahmawati',  email: 'dosen@unesa.ac.id',     role: 'dosen',     noid: '198501012010122001', status: 'Aktif' },
+    { id: 5, nama: 'Ir. Budi Santoso',    email: 'admin@unesa.ac.id',     role: 'admin',     noid: '197003011998031001', status: 'Aktif' },
+    { id: 6, nama: 'Ali Ma\'ruf',         email: 'ali@mhs.unesa.ac.id',   role: 'mahasiswa', noid: '24051204145',       status: 'Aktif' },
+    { id: 7, nama: 'Tanisha Savaira',     email: 'tanisha@mhs.unesa.ac.id', role: 'mahasiswa', noid: '24051204158',     status: 'Aktif' },
+  ],
+  inventaris: [
+    { id: 1, kode: 'RPL-PC-001', nama: 'Komputer Workstation', lab: 'Lab RPL', kondisi: 'Baik', status: 'Tersedia', merk: 'Lenovo', tahun: 2022 },
+    { id: 2, kode: 'RPL-PC-002', nama: 'Komputer Workstation', lab: 'Lab RPL', kondisi: 'Rusak', status: 'Tidak Tersedia', merk: 'Lenovo', tahun: 2020 },
+    { id: 3, kode: 'JAR-SW-001', nama: 'Managed Switch 24-Port', lab: 'Lab Jaringan', kondisi: 'Baik', status: 'Tersedia', merk: 'Cisco', tahun: 2021 },
+    { id: 4, kode: 'AI-GPU-001', nama: 'GPU Server RTX 3090', lab: 'Lab AI', kondisi: 'Baik', status: 'Dipinjam', merk: 'NVIDIA', tahun: 2023 },
+    { id: 5, kode: 'MM-CAM-001', nama: 'Kamera DSLR Canon', lab: 'Lab Multimedia', kondisi: 'Baik', status: 'Tersedia', merk: 'Canon', tahun: 2021 },
+    { id: 6, kode: 'RPL-PROJ-001', nama: 'Proyektor Epson', lab: 'Lab RPL', kondisi: 'Baik', status: 'Tersedia', merk: 'Epson', tahun: 2022 },
+  ],
+  matkul: [
+    { id: 1, kode: 'TI301', nama: 'Pemrograman Web', sks: 3, dosen: 'Dr. Siti Rahmawati' },
+    { id: 2, kode: 'TI302', nama: 'Jaringan Komputer', sks: 3, dosen: 'Dr. Siti Rahmawati' },
+    { id: 3, kode: 'TI401', nama: 'Machine Learning', sks: 3, dosen: 'Ir. Budi Santoso' },
+    { id: 4, kode: 'TI303', nama: 'Desain Multimedia', sks: 2, dosen: 'Dr. Siti Rahmawati' },
+  ],
+  peminjaman: [
+    { id: 1, pemohon: 'Rifqi Syawal',     nim: '24051204150', aset: 'GPU Server RTX 3090',     lab: 'Lab AI',        tanggal: '2026-04-20', kembali: '2026-04-22', status: 'Disetujui',  verif: 'Dr. Siti Rahmawati' },
+    { id: 2, pemohon: 'Ali Ma\'ruf',       nim: '24051204145', aset: 'Managed Switch 24-Port', lab: 'Lab Jaringan', tanggal: '2026-04-24', kembali: '2026-04-25', status: 'Menunggu Validasi', verif: '' },
+    { id: 3, pemohon: 'Ata Annisa Azka',  nim: '24051204139', aset: 'Proyektor Epson',         lab: 'Lab RPL',       tanggal: '2026-04-26', kembali: '2026-04-27', status: 'Menunggu Validasi', verif: '' },
+    { id: 4, pemohon: 'Tanisha Savaira',   nim: '24051204158', aset: 'Kamera DSLR Canon',       lab: 'Lab Multimedia', tanggal: '2026-04-18', kembali: '2026-04-19', status: 'Disetujui', verif: 'Dr. Siti Rahmawati' },
+  ],
+  ruangan: [
+    { id: 1, nama: 'Lab RPL', kapasitas: 40, gedung: 'T4 Lt. 3', status: 'Tersedia' },
+    { id: 2, nama: 'Lab Jaringan Komputer', kapasitas: 30, gedung: 'T4 Lt. 2', status: 'Terpakai' },
+    { id: 3, nama: 'Lab AI', kapasitas: 25, gedung: 'T4 Lt. 4', status: 'Tersedia' },
+    { id: 4, nama: 'Lab Multimedia', kapasitas: 35, gedung: 'T4 Lt. 1', status: 'Tersedia' },
+    { id: 5, nama: 'Lab Sistem Informasi', kapasitas: 30, gedung: 'T4 Lt. 2', status: 'Tersedia' },
+  ],
+  bookingRuang: [
+    { id: 1, pemohon: 'Ali Ma\'ruf', ruangan: 'Lab RPL', tanggal: '2026-04-26', waktu: '08:00-10:00', keperluan: 'Praktikum Jarkom', status: 'Disetujui' },
+    { id: 2, pemohon: 'Ata Annisa Azka', ruangan: 'Lab AI', tanggal: '2026-04-27', waktu: '13:00-15:00', keperluan: 'Tugas Akhir', status: 'Menunggu' },
+  ],
+  jadwal: [
+    { id: 1, matkul: 'Jaringan Komputer', kelas: 'TI 2024 A', lab: 'Lab Jaringan Komputer', hari: 'Senin', jam: '08:00-10:00', dosen: 'Dr. Siti Rahmawati', mahasiswa: 30 },
+    { id: 2, matkul: 'Pemrograman Web', kelas: 'TI 2024 B', lab: 'Lab RPL', hari: 'Selasa', jam: '10:00-12:00', dosen: 'Dr. Siti Rahmawati', mahasiswa: 35 },
+    { id: 3, matkul: 'Machine Learning', kelas: 'TI 2023 A', lab: 'Lab AI', hari: 'Rabu', jam: '13:00-15:00', dosen: 'Ir. Budi Santoso', mahasiswa: 25 },
+    { id: 4, matkul: 'Desain Multimedia', kelas: 'TI 2024 C', lab: 'Lab Multimedia', hari: 'Kamis', jam: '08:00-10:00', dosen: 'Dr. Siti Rahmawati', mahasiswa: 32 },
+  ],
+  nilai: [
+    { id: 1, nim: '24051204139', nama: 'Ata Annisa Azka', matkul: 'Pemrograman Web', modul1: 85, modul2: 90, modul3: 88, uas: 87, grade: 'A' },
+    { id: 2, nim: '24051204141', nama: 'Zakia Minhatul Maula', matkul: 'Pemrograman Web', modul1: 78, modul2: 82, modul3: 80, uas: 81, grade: 'B+' },
+    { id: 3, nim: '24051204146', nama: 'Gizelle Mathilda M.', matkul: 'Jaringan Komputer', modul1: 92, modul2: 88, modul3: 91, uas: 90, grade: 'A' },
+    { id: 4, nim: '24051204155', nama: 'Desty Putri P.', matkul: 'Pemrograman Web', modul1: 75, modul2: 79, modul3: 77, uas: 78, grade: 'B' },
+  ],
+  absensi: [
+    { id: 1, tanggal: '2026-04-07', matkul: 'Pemrograman Web', kelas: 'TI 2024 B', hadir: 33, izin: 1, alfa: 1, total: 35 },
+    { id: 2, tanggal: '2026-04-14', matkul: 'Pemrograman Web', kelas: 'TI 2024 B', hadir: 35, izin: 0, alfa: 0, total: 35 },
+    { id: 3, tanggal: '2026-04-21', matkul: 'Pemrograman Web', kelas: 'TI 2024 B', hadir: 30, izin: 3, alfa: 2, total: 35 },
+  ],
+  modul: [
+    { id: 1, judul: 'Modul 1 - Pengenalan HTML & CSS', matkul: 'Pemrograman Web', dosen: 'Dr. Siti Rahmawati', tanggal: '2026-03-10', ukuran: '2.4 MB', format: 'PDF' },
+    { id: 2, judul: 'Modul 2 - JavaScript Dasar', matkul: 'Pemrograman Web', dosen: 'Dr. Siti Rahmawati', tanggal: '2026-03-17', ukuran: '3.1 MB', format: 'PDF' },
+    { id: 3, judul: 'Modul 3 - Framework Vue.js', matkul: 'Pemrograman Web', dosen: 'Dr. Siti Rahmawati', tanggal: '2026-03-24', ukuran: '4.2 MB', format: 'PDF' },
+    { id: 4, judul: 'Modul 1 - Routing & Subnetting', matkul: 'Jaringan Komputer', dosen: 'Ir. Budi Santoso', tanggal: '2026-03-10', ukuran: '1.8 MB', format: 'PDF' },
+  ],
+  kerusakan: [
+    { id: 1, kode: 'RPL-PC-002', nama: 'Komputer Workstation', lab: 'Lab RPL', deskripsi: 'Monitor tidak menyala, kemungkinan PSU rusak', dilaporkan: '2026-04-15', oleh: 'Irma Aulia', status: 'Dalam Perbaikan' },
+    { id: 2, kode: 'JAR-RT-003', nama: 'Router Cisco 2900', lab: 'Lab Jaringan', deskripsi: 'Interface Ethernet tidak terdeteksi', dilaporkan: '2026-04-20', oleh: 'Sutan Fil\'ilmi', status: 'Menunggu Teknisi' },
+  ],
+  insiden: [
+    { id: 1, judul: 'Kebocoran AC di Lab RPL', deskripsi: 'Air menetes dari unit AC ke meja komputer nomor 5', tanggal: '2026-04-22', lab: 'Lab RPL', dilaporkan: 'Gizelle Mathilda', status: 'Ditangani' },
+  ],
+  pemeliharaan: [
+    { id: 1, aset: 'Semua Komputer Lab RPL', jenis: 'Pembersihan Rutin', tanggal: '2026-04-28', teknisi: 'Tim IT Kampus', status: 'Dijadwalkan' },
+    { id: 2, aset: 'AC Lab AI', jenis: 'Servis AC', tanggal: '2026-05-05', teknisi: 'CV. Sejuk Teknik', status: 'Dijadwalkan' },
+    { id: 3, aset: 'Server Lab AI', jenis: 'Update Sistem', tanggal: '2026-04-10', teknisi: 'Tim IT Kampus', status: 'Selesai' },
+  ],
+  notifikasi: [
+    { id: 1, judul: 'Peminjaman Disetujui', desc: 'Peminjaman Proyektor Epson Anda telah disetujui', waktu: '2 jam lalu', dibaca: false },
+    { id: 2, judul: 'Jadwal Praktikum', desc: 'Praktikum Pemrograman Web besok Selasa 10:00 WIB', waktu: '5 jam lalu', dibaca: false },
+    { id: 3, judul: 'Modul Baru', desc: 'Modul 3 Framework Vue.js telah diunggah', waktu: '1 hari lalu', dibaca: true },
+  ],
+};
+
+// ═══════════ AUTH ═══════════
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pwd = document.getElementById('login-password').value;
+  const role = document.getElementById('login-role').value;
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+
+  // 1) coba akun demo bawaan
+  const acc = accounts[role];
+  let matched = null;
+  if (acc && acc.email === email && acc.password === pwd) {
+    matched = USERS.find(u => u.role === role && u.email === email) || USERS.find(u => u.role === role);
+  }
+  // 2) coba akun yang dibuat lewat halaman Register
+  if (!matched && state.registered) {
+    const r = state.registered.find(x => x.email.toLowerCase() === email.toLowerCase() && x.password === pwd && x.role === role);
+    if (r) matched = USERS.find(u => u.email === r.email) || { email: r.email, role: r.role, name: r.name, nim: r.noid, lab: '-' };
+  }
+  if (!matched) { errEl.textContent = 'Email atau password salah. Silakan coba lagi.'; errEl.style.display = 'block'; return; }
+
+  state.user = matched;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('register-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  initApp();
+}
+function doLogout() {
+  state.user = null; state.currentPage = 'dashboard';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+// ═══════════ GOOGLE LOGIN (simulasi OAuth + role controller di backend) ═══════════
+// Alur:
+//  1. User klik "Masuk dengan Google" -> dapat email Google.
+//  2. Frontend POST email ke backend /api/auth/google.
+//  3. AuthController.googleLogin() menentukan role berdasarkan domain/whitelist:
+//       - admin.unesa.ac.id  -> admin
+//       - dosen.unesa.ac.id  -> dosen
+//       - aslab.unesa.ac.id  -> aslab
+//       - asprak.unesa.ac.id -> asprak
+//       - mhs.unesa.ac.id / unesa.ac.id (default) -> mahasiswa
+//     dan mencocokkan dengan tabel users (whitelist NIP/NIM) bila ada.
+function detectRoleFromEmail(email) {
+  const e = (email || '').toLowerCase().trim();
+  if (e.endsWith('@admin.unesa.ac.id'))  return 'admin';
+  if (e.endsWith('@dosen.unesa.ac.id'))  return 'dosen';
+  if (e.endsWith('@aslab.unesa.ac.id'))  return 'aslab';
+  if (e.endsWith('@asprak.unesa.ac.id')) return 'asprak';
+  // domain lain (unesa.ac.id / mhs.unesa.ac.id) -> mahasiswa
+  return 'mahasiswa';
+}
+function doGoogleLogin() {
+  // Simulasi popup Google: minta email Google
+  const email = prompt('Masuk dengan Google\n\nMasukkan email Google Anda:\n(domain menentukan peran — mis. admin@admin.unesa.ac.id, dosen@dosen.unesa.ac.id, aslab@aslab.unesa.ac.id, asprak@asprak.unesa.ac.id, atau email mahasiswa biasa)');
+  if (!email) return;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    const errEl = document.getElementById('login-error');
+    errEl.textContent = 'Format email Google tidak valid.'; errEl.style.display = 'block'; return;
+  }
+  // === Sisi backend (controller) — disimulasikan di sini ===
+  const role = detectRoleFromEmail(email);
+  // Cari user existing; jika tidak ada, buat baru sesuai role
+  let matched = USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
+  if (!matched) {
+    const namaDariEmail = email.split('@')[0]
+      .replace(/[._]+/g, ' ')
+      .replace(/\b\w/g, c => c.toUpperCase());
+    matched = { email, role, name: namaDariEmail, nim: '-', lab: '-', viaGoogle: true };
+    USERS.push(matched);
+    state.users.push({ id: Date.now(), nama: namaDariEmail, email, role, noid: '-', status: 'Aktif' });
+  } else {
+    // Update role bila domain Google lebih spesifik (mis. dipromosikan menjadi dosen)
+    matched.role = role;
+  }
+  state.user = matched;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('register-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  initApp();
+  showToast && showToast('Login Google berhasil sebagai ' + roleLabel(role) + '.','success');
+  toast && toast('Login Google berhasil sebagai ' + roleLabel(role) + '.','success');
+}
+
+// ═══════════ REGISTER (halaman Buat Akun Baru) ═══════════
+function showRegister() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('register-screen').style.display = 'flex';
+}
+function showLogin() {
+  document.getElementById('register-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+function doRegister() {
+  const nama  = document.getElementById('reg-nama').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const noid  = document.getElementById('reg-noid').value.trim();
+  const role  = document.getElementById('reg-role').value;
+  const pwd   = document.getElementById('reg-password').value;
+  const pwd2  = document.getElementById('reg-password2').value;
+  const errEl = document.getElementById('register-error');
+  errEl.style.display = 'none';
+
+  if (!nama || !email || !pwd || !pwd2) {
+    errEl.textContent = 'Mohon lengkapi semua data wajib.'; errEl.style.display = 'block'; return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errEl.textContent = 'Format email tidak valid.'; errEl.style.display = 'block'; return;
+  }
+  if (pwd.length < 6) {
+    errEl.textContent = 'Password minimal 6 karakter.'; errEl.style.display = 'block'; return;
+  }
+  if (pwd !== pwd2) {
+    errEl.textContent = 'Konfirmasi password tidak cocok.'; errEl.style.display = 'block'; return;
+  }
+  if (state.users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+    errEl.textContent = 'Email sudah terdaftar. Gunakan email lain.'; errEl.style.display = 'block'; return;
+  }
+
+  // Simpan user baru ke state
+  const newUser = {
+    id: Date.now(),
+    nama, email, noid: noid || '-', role, status: 'Aktif'
+  };
+  state.users.push(newUser);
+
+  // Daftarkan kredensial supaya bisa langsung login (account list mendukung 1 akun per role,
+  // jadi kita tetap simpan akun yang baru dibuat di list khusus pendaftaran)
+  if (!state.registered) state.registered = [];
+  state.registered.push({ email, password: pwd, role, name: nama, noid });
+
+  // Tambahkan juga ke USERS list agar profil bisa terdeteksi
+  USERS.push({ email, role, name: nama, nim: noid, lab: '-' });
+
+  // reset form
+  ['reg-nama','reg-email','reg-noid','reg-password','reg-password2'].forEach(id => document.getElementById(id).value = '');
+
+  // Auto-login: langsung masuk ke laman sesuai role yang dipilih
+  const matched = USERS.find(u => u.email === email) || { email, role, name: nama, nim: noid || '-', lab: '-' };
+  state.user = matched;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('register-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  initApp();
+  showToast('Akun berhasil dibuat! Selamat datang, ' + nama + '.', 'success');
+}
+function initApp() {
+  const u = state.user;
+  const sa = document.getElementById('sidebar-avatar');
+  sa.textContent = u.name.charAt(0);
+  sa.style.backgroundImage = ''; sa.style.color = '';
+  if (u.photo) {
+    sa.style.backgroundImage = `url(${u.photo})`;
+    sa.style.backgroundSize = 'cover'; sa.style.backgroundPosition = 'center';
+    sa.style.color = 'transparent';
+  }
+  document.getElementById('sidebar-name').textContent = u.name;
+  document.getElementById('sidebar-role').textContent = roleLabel(u.role);
+  document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  renderSidebar(); renderNotifList(); navigate('dashboard'); refreshLucide();
+}
+function roleLabel(r) {
+  return { mahasiswa: 'Mahasiswa', asprak: 'Asisten Praktikum', aslab: 'Asisten Lab', dosen: 'Dosen', admin: 'Admin Pengelola' }[r] || r;
+}
+
+// ═══════════ MENU (icons = nama lucide-icon) ═══════════
+function ic(name, attrs='') { return `<i data-lucide="${name}" ${attrs}></i>`; }
+function refreshLucide() { if (window.lucide && window.lucide.createIcons) window.lucide.createIcons(); }
+
+const menus = {
+  mahasiswa: [
+    { section: 'Utama' },
+    { id: 'dashboard', icon: 'layout-dashboard', label: 'Dashboard' },
+    { id: 'jadwal', icon: 'calendar-days', label: 'Jadwal Praktikum' },
+    { section: 'Peminjaman' },
+    { id: 'ajukan-peminjaman', icon: 'send', label: 'Ajukan Peminjaman' },
+    { id: 'booking-ruang', icon: 'building-2', label: 'Booking Ruangan Lab' },
+    { id: 'riwayat-peminjaman', icon: 'history', label: 'Riwayat Peminjaman' },
+    { section: 'Akademik' },
+    { id: 'nilai-absensi', icon: 'bar-chart-3', label: 'Nilai & Absensi' },
+    { id: 'modul', icon: 'book-open', label: 'Modul Praktikum' },
+    { section: 'Lainnya' },
+    { id: 'lapor-kerusakan', icon: 'wrench', label: 'Lapor Kerusakan' },
+    { id: 'lapor-insiden', icon: 'alert-triangle', label: 'Lapor Insiden' },
+    { id: 'profil', icon: 'user', label: 'Profil Saya' },
+  ],
+  asprak: [
+    { section: 'Utama' },
+    { id: 'dashboard', icon: 'layout-dashboard', label: 'Dashboard' },
+    { id: 'jadwal', icon: 'calendar-days', label: 'Jadwal Praktikum' },
+    { section: 'Akademik' },
+    { id: 'absensi', icon: 'check-circle-2', label: 'Absensi Praktikum' },
+    { id: 'kelola-nilai', icon: 'bar-chart-3', label: 'Input Nilai' },
+    { id: 'modul', icon: 'book-open', label: 'Unggah Modul' },
+    { section: 'Lainnya' },
+    { id: 'lapor-kerusakan', icon: 'wrench', label: 'Lapor Kerusakan' },
+    { id: 'lapor-insiden', icon: 'alert-triangle', label: 'Lapor Insiden' },
+    { id: 'profil', icon: 'user', label: 'Profil Saya' },
+  ],
+  aslab: [
+    { section: 'Utama' },
+    { id: 'dashboard', icon: 'layout-dashboard', label: 'Dashboard' },
+    { section: 'Inventaris' },
+    { id: 'inventaris', icon: 'package', label: 'Inventaris Aset' },
+    { id: 'ruangan', icon: 'building-2', label: 'Data Ruangan' },
+    { section: 'Peminjaman' },
+    { id: 'semua-peminjaman', icon: 'clipboard-list', label: 'Semua Peminjaman' },
+    { section: 'Maintenance' },
+    { id: 'kerusakan', icon: 'wrench', label: 'Laporan Kerusakan' },
+    { id: 'pemeliharaan', icon: 'hammer', label: 'Jadwal Pemeliharaan' },
+    { id: 'insiden', icon: 'alert-triangle', label: 'Laporan Insiden' },
+    { section: 'Lainnya' },
+    { id: 'profil', icon: 'user', label: 'Profil Saya' },
+  ],
+  dosen: [
+    { section: 'Utama' },
+    { id: 'dashboard', icon: 'layout-dashboard', label: 'Dashboard' },
+    { section: 'Akademik' },
+    { id: 'absensi', icon: 'check-circle-2', label: 'Riwayat Absensi' },
+    { id: 'kelola-nilai', icon: 'bar-chart-3', label: 'Input Nilai' },
+    { id: 'modul', icon: 'book-open', label: 'Unggah Modul' },
+    { section: 'Validasi' },
+    { id: 'validasi', icon: 'badge-check', label: 'Validasi Peminjaman' },
+    { id: 'riwayat-peminjaman', icon: 'history', label: 'Riwayat Peminjaman' },
+    { section: 'Maintenance' },
+    { id: 'kerusakan', icon: 'wrench', label: 'Riwayat Kerusakan' },
+    { section: 'Lainnya' },
+    { id: 'lapor-kerusakan', icon: 'wrench', label: 'Lapor Kerusakan' },
+    { id: 'profil', icon: 'user', label: 'Profil Saya' },
+  ],
+  admin: [
+    { section: 'Utama' },
+    { id: 'dashboard', icon: 'layout-dashboard', label: 'Dashboard' },
+    { section: 'Inventaris & Lab' },
+    { id: 'inventaris', icon: 'package', label: 'Inventaris Aset' },
+    { id: 'ruangan', icon: 'building-2', label: 'Data Ruangan' },
+    { id: 'matkul', icon: 'graduation-cap', label: 'Mata Kuliah' },
+    { id: 'jadwal', icon: 'calendar-days', label: 'Jadwal Praktikum' },
+    { section: 'Peminjaman' },
+    { id: 'semua-peminjaman', icon: 'clipboard-list', label: 'Semua Peminjaman' },
+    { section: 'Maintenance' },
+    { id: 'kerusakan', icon: 'wrench', label: 'Laporan Kerusakan' },
+    { id: 'pemeliharaan', icon: 'hammer', label: 'Jadwal Pemeliharaan' },
+    { id: 'riwayat-pemeliharaan', icon: 'scroll', label: 'Riwayat Pemeliharaan' },
+    { id: 'insiden', icon: 'alert-triangle', label: 'Laporan Insiden' },
+    { section: 'Akademik' },
+    { id: 'absensi', icon: 'check-circle-2', label: 'Absensi Praktikum' },
+    { id: 'kelola-nilai', icon: 'bar-chart-3', label: 'Kelola Nilai' },
+    { id: 'modul', icon: 'book-open', label: 'Modul Praktikum' },
+    { id: 'laporan', icon: 'trending-up', label: 'Laporan & Statistik' },
+    { section: 'Administrasi' },
+    { id: 'manajemen-user', icon: 'users', label: 'Manajemen Pengguna' },
+    { id: 'profil', icon: 'user', label: 'Profil Saya' },
+  ],
+};
+
+function renderSidebar() {
+  const items = menus[state.user.role] || [];
+  let html = '';
+  items.forEach(m => {
+    if (m.section) { html += `<div class="nav-section-title">${m.section}</div>`; return; }
+    const active = m.id === state.currentPage ? 'active' : '';
+    let badgeCount = 0;
+    if (m.id === 'validasi') {
+      badgeCount = state.peminjaman.filter(p => p.status === 'Menunggu Validasi').length;
+    }
+    const badge = badgeCount > 0 ? `<span class="nav-badge">${badgeCount}</span>` : '';
+    html += `<div class="nav-item ${active}" onclick="navigate('${m.id}')"><span class="nav-icon">${ic(m.icon)}</span> ${m.label} ${badge}</div>`;
+  });
+  document.getElementById('sidebar-nav').innerHTML = html;
+  refreshLucide();
+}
+
+function navigate(page) {
+  state.currentPage = page;
+  renderSidebar();
+  const titles = {
+    dashboard:'Dashboard', inventaris:'Inventaris Aset', ruangan:'Data Ruangan', matkul:'Mata Kuliah',
+    jadwal:'Jadwal Praktikum', 'semua-peminjaman':'Semua Peminjaman', validasi:'Validasi Peminjaman',
+    kerusakan:'Laporan Kerusakan', pemeliharaan:'Jadwal Pemeliharaan', 'riwayat-pemeliharaan':'Riwayat Pemeliharaan',
+    insiden:'Laporan Insiden', absensi:'Absensi Praktikum', 'kelola-nilai':'Input/Kelola Nilai',
+    modul:'Modul Praktikum', laporan:'Laporan & Statistik', 'manajemen-user':'Manajemen Pengguna',
+    'ajukan-peminjaman':'Ajukan Peminjaman', 'booking-ruang':'Booking Ruangan Lab',
+    'riwayat-peminjaman':'Riwayat Peminjaman', 'nilai-absensi':'Nilai & Absensi Saya',
+    'lapor-kerusakan':'Lapor Kerusakan', 'lapor-insiden':'Lapor Insiden', profil:'Profil Saya',
+  };
+  document.getElementById('topbar-title').textContent = titles[page] || page;
+  const area = document.getElementById('content-area');
+  const fn = pages[page];
+  area.innerHTML = fn ? fn() : `<div class="empty-state"><div class="icon">${ic('construction')}</div><p>Halaman <b>${page}</b> sedang dikembangkan.</p></div>`;
+  refreshLucide();
+}
+
+// ═══════════ NOTIF / TOAST / MODAL ═══════════
+function renderNotifList() {
+  let html = '';
+  state.notifikasi.forEach(n => {
+    html += `<div class="notif-item"><div class="notif-title">${n.dibaca?'':ic('circle','style="color:var(--blue);width:8px;height:8px;fill:var(--blue)"')+' '}${n.judul}</div><div class="notif-desc">${n.desc}</div><div class="notif-time">${n.waktu}</div></div>`;
+  });
+  document.getElementById('notif-list').innerHTML = html;
+  updateNotifDot();
+  refreshLucide();
+}
+function updateNotifDot() {
+  const dot = document.getElementById('notif-dot');
+  if (!dot) return;
+  const unread = state.notifikasi.filter(n => !n.dibaca).length;
+  dot.style.display = unread > 0 ? 'block' : 'none';
+}
+function toggleNotif() {
+  const panel = document.getElementById('notif-panel');
+  const opening = !panel.classList.contains('open');
+  panel.classList.toggle('open');
+  if (opening) {
+    // tandai semua notifikasi sebagai dibaca saat panel dibuka
+    state.notifikasi.forEach(n => n.dibaca = true);
+    renderNotifList();
+  }
+}
+document.addEventListener('click', e => {
+  const panel = document.getElementById('notif-panel');
+  if (!panel.contains(e.target) && !e.target.closest('.notif-bell')) panel.classList.remove('open');
+});
+function toast(msg, type='default') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`; el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>el.remove(), 3500);
+}
+function openModal(title, body, footer='') {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = body;
+  document.getElementById('modal-footer').innerHTML = footer;
+  document.getElementById('modal-overlay').classList.add('open');
+  refreshLucide();
+}
+function closeModal(e) { if (e.target.id === 'modal-overlay') closeModalForce(); }
+function closeModalForce() { document.getElementById('modal-overlay').classList.remove('open'); }
+
+// ═══════════ PAGES ═══════════
+const pages = {};
+
+// === DASHBOARD ===
+pages['dashboard'] = function() {
+  const r = state.user.role;
+  if (r === 'mahasiswa') return dashMahasiswa();
+  if (r === 'asprak')    return dashAsprak();
+  if (r === 'aslab')     return dashAslab();
+  if (r === 'dosen')     return dashDosen();
+  return dashAdmin();
+};
+
+function dashMahasiswa() {
+  const myPinjam = state.peminjaman.filter(p => p.pemohon === state.user.name);
+  const pending = myPinjam.filter(p => p.status.includes('Menunggu')).length;
+  return `
+  <div class="page-heading"><h1>Selamat datang, ${state.user.name.split(' ')[0]}! 👋</h1><p>Ringkasan aktivitas Lab Anda hari ini.</p></div>
+  <div class="grid grid-4 mb-6">
+    <div class="stat-card"><div class="stat-icon blue">📤</div><div><div class="stat-value">${myPinjam.length}</div><div class="stat-label">Total Peminjaman</div></div></div>
+    <div class="stat-card"><div class="stat-icon amber">⏳</div><div><div class="stat-value">${pending}</div><div class="stat-label">Menunggu Persetujuan</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">📚</div><div><div class="stat-value">${state.modul.length}</div><div class="stat-label">Modul Tersedia</div></div></div>
+    <div class="stat-card"><div class="stat-icon red">🔔</div><div><div class="stat-value">${state.notifikasi.filter(n=>!n.dibaca).length}</div><div class="stat-label">Notifikasi Baru</div></div></div>
+  </div>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Jadwal Praktikum Mendatang</div><button class="btn btn-outline btn-sm" onclick="navigate('jadwal')">Lihat Semua</button></div>
+      <table><thead><tr><th>Mata Kuliah</th><th>Hari</th><th>Jam</th><th>Lab</th></tr></thead><tbody>
+      ${state.jadwal.slice(0,3).map(j=>`<tr><td><b>${j.matkul}</b></td><td>${j.hari}</td><td>${j.jam}</td><td>${j.lab}</td></tr>`).join('')}
+      </tbody></table>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Status Peminjaman Saya</div><button class="btn btn-success btn-sm" onclick="navigate('ajukan-peminjaman')">+ Ajukan</button></div>
+      ${myPinjam.length ? `<table><thead><tr><th>Aset</th><th>Tgl</th><th>Status</th></tr></thead><tbody>
+      ${myPinjam.map(p=>`<tr><td>${p.aset}</td><td>${p.tanggal}</td><td>${badgeStatus(p.status)}</td></tr>`).join('')}
+      </tbody></table>` : `<div class="empty-state"><div class="icon">📭</div><p>Belum ada peminjaman.</p></div>`}
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Booking Ruangan Saya</div><button class="btn btn-success btn-sm" onclick="navigate('booking-ruang')">+ Booking</button></div>
+      ${state.bookingRuang.filter(b=>b.pemohon===state.user.name).map(b=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:600">${b.ruangan}</div><div style="font-size:11px;color:var(--text-muted)">${b.tanggal} • ${b.waktu}</div></div>${badgeStatus(b.status)}</div>`).join('') || '<div class="empty-state"><div class="icon">🏢</div><p>Belum ada booking.</p></div>'}
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Modul Terbaru</div><button class="btn btn-outline btn-sm" onclick="navigate('modul')">Lihat Semua</button></div>
+      ${state.modul.slice(0,3).map(m=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <div style="width:36px;height:36px;background:#fef3c7;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📄</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">${m.judul}</div><div style="font-size:11px;color:var(--text-muted)">${m.matkul} • ${m.tanggal}</div></div>
+          <button class="btn btn-sm btn-outline" onclick="unduhModul(${m.id})">⬇</button>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function dashAsprak() {
+  return `
+  <div class="page-heading"><h1>Selamat datang, ${state.user.name.split(' ')[0]}! 👋</h1><p>Panel Asisten Praktikum.</p></div>
+  <div class="grid grid-4 mb-6">
+    <div class="stat-card"><div class="stat-icon blue">📅</div><div><div class="stat-value">${state.jadwal.length}</div><div class="stat-label">Jadwal Praktikum</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">📊</div><div><div class="stat-value">${state.nilai.length}</div><div class="stat-label">Data Nilai</div></div></div>
+    <div class="stat-card"><div class="stat-icon amber">✅</div><div><div class="stat-value">${state.absensi.length}</div><div class="stat-label">Sesi Absensi</div></div></div>
+    <div class="stat-card"><div class="stat-icon red">📚</div><div><div class="stat-value">${state.modul.length}</div><div class="stat-label">Modul Tersedia</div></div></div>
+  </div>
+  <div class="grid grid-2">
+    <div class="card"><div class="card-header"><div class="card-title">Quick Actions</div></div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button class="btn btn-primary" onclick="navigate('kelola-nilai')">📊 Input Nilai Mahasiswa</button>
+        <button class="btn btn-success" onclick="navigate('modul')">📤 Unggah Modul Baru</button>
+        <button class="btn btn-warning" onclick="navigate('absensi')">✅ Input Absensi</button>
+      </div>
+    </div>
+    <div class="card"><div class="card-header"><div class="card-title">Absensi Terkini</div></div>
+      <table><thead><tr><th>Tanggal</th><th>Matkul</th><th>Hadir</th></tr></thead><tbody>
+      ${state.absensi.slice(0,4).map(a=>`<tr><td>${a.tanggal}</td><td>${a.matkul}</td><td><span class="badge badge-green">${a.hadir}/${a.total}</span></td></tr>`).join('')}
+      </tbody></table>
+    </div>
+  </div>`;
+}
+
+function dashAslab() {
+  const totalAset = state.inventaris.length;
+  const asetRusak = state.inventaris.filter(i=>i.kondisi==='Rusak').length;
+  return `
+  <div class="page-heading"><h1>Dashboard Asisten Lab 🔬</h1><p>Pantau inventaris dan kondisi laboratorium.</p></div>
+  <div class="grid grid-4 mb-6">
+    <div class="stat-card"><div class="stat-icon blue">📦</div><div><div class="stat-value">${totalAset}</div><div class="stat-label">Total Aset</div></div></div>
+    <div class="stat-card"><div class="stat-icon red">⚠️</div><div><div class="stat-value">${asetRusak}</div><div class="stat-label">Aset Rusak</div></div></div>
+    <div class="stat-card"><div class="stat-icon amber">🔧</div><div><div class="stat-value">${state.kerusakan.length}</div><div class="stat-label">Laporan Kerusakan</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">🛠️</div><div><div class="stat-value">${state.pemeliharaan.filter(p=>p.status==='Dijadwalkan').length}</div><div class="stat-label">Pemeliharaan Aktif</div></div></div>
+  </div>
+  <div class="grid grid-2">
+    <div class="card"><div class="card-header"><div class="card-title">Status Inventaris</div><button class="btn btn-outline btn-sm" onclick="navigate('inventaris')">Kelola</button></div>
+      <table><thead><tr><th>Kode</th><th>Nama</th><th>Status</th></tr></thead><tbody>
+      ${state.inventaris.slice(0,5).map(i=>`<tr><td><code style="font-size:11px">${i.kode}</code></td><td>${i.nama}</td><td>${badgeStatus(i.status)}</td></tr>`).join('')}
+      </tbody></table>
+    </div>
+    <div class="card"><div class="card-header"><div class="card-title">Pemeliharaan Mendatang</div><button class="btn btn-outline btn-sm" onclick="navigate('pemeliharaan')">+ Tambah</button></div>
+      ${state.pemeliharaan.filter(p=>p.status==='Dijadwalkan').map(p=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><div style="font-size:13px;font-weight:600">${p.aset}</div><div style="font-size:12px;color:var(--text-muted)">${p.jenis} • ${p.tanggal}</div></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function dashDosen() {
+  const pending = state.peminjaman.filter(p => p.status === 'Menunggu Validasi').length;
+  return `
+  <div class="page-heading"><h1>Selamat datang, ${state.user.name.split(' ')[0]}! 👋</h1><p>Panel Dosen.</p></div>
+  <div class="grid grid-4 mb-6">
+    <div class="stat-card"><div class="stat-icon amber">🔍</div><div><div class="stat-value">${pending}</div><div class="stat-label">Perlu Divalidasi</div></div></div>
+    <div class="stat-card"><div class="stat-icon blue">📅</div><div><div class="stat-value">${state.jadwal.length}</div><div class="stat-label">Jadwal Aktif</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">👥</div><div><div class="stat-value">${state.nilai.length}</div><div class="stat-label">Data Nilai</div></div></div>
+    <div class="stat-card"><div class="stat-icon red">📚</div><div><div class="stat-value">${state.modul.length}</div><div class="stat-label">Modul Diunggah</div></div></div>
+  </div>
+  <div class="grid grid-2">
+    <div class="card"><div class="card-header"><div class="card-title">Validasi Peminjaman (${pending} pending)</div><button class="btn btn-primary btn-sm" onclick="navigate('validasi')">Lihat</button></div>
+      <table><thead><tr><th>Pemohon</th><th>Aset</th><th>Status</th></tr></thead><tbody>
+      ${state.peminjaman.filter(p=>p.status==='Menunggu Validasi').slice(0,3).map(p=>`<tr><td>${p.pemohon}</td><td>${p.aset}</td><td>${badgeStatus(p.status)}</td></tr>`).join('') || '<tr><td colspan="3" style="text-align:center;color:var(--text-muted)">Tidak ada pending</td></tr>'}
+      </tbody></table>
+    </div>
+    <div class="card"><div class="card-header"><div class="card-title">Riwayat Kerusakan Aset</div><button class="btn btn-outline btn-sm" onclick="navigate('kerusakan')">Lihat</button></div>
+      <table><thead><tr><th>Aset</th><th>Lab</th><th>Status</th></tr></thead><tbody>
+      ${state.kerusakan.slice(0,4).map(k=>`<tr><td><b>${k.nama}</b></td><td>${k.lab}</td><td>${badgeStatus(k.status)}</td></tr>`).join('') || '<tr><td colspan="3" style="text-align:center;color:var(--text-muted)">Tidak ada laporan</td></tr>'}
+      </tbody></table>
+    </div>
+  </div>`;
+}
+
+function dashAdmin() {
+  return `
+  <div class="page-heading"><h1>Dashboard Admin Pengelola 🏛️</h1><p>Pantau seluruh aktivitas sistem dari satu tempat.</p></div>
+  <div class="grid grid-4 mb-6">
+    <div class="stat-card"><div class="stat-icon blue">👥</div><div><div class="stat-value">${state.users.length}</div><div class="stat-label">Total Pengguna</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">📦</div><div><div class="stat-value">${state.inventaris.length}</div><div class="stat-label">Total Aset</div></div></div>
+    <div class="stat-card"><div class="stat-icon amber">🔧</div><div><div class="stat-value">${state.kerusakan.filter(k=>k.status!=='Selesai').length}</div><div class="stat-label">Kerusakan Aktif</div></div></div>
+    <div class="stat-card"><div class="stat-icon red">🏢</div><div><div class="stat-value">${state.ruangan.length}</div><div class="stat-label">Ruangan Lab</div></div></div>
+  </div>
+  <div class="grid grid-2 mb-4">
+    <div class="card"><div class="card-header"><div class="card-title">Pengguna Aktif per Peran</div><button class="btn btn-outline btn-sm" onclick="navigate('manajemen-user')">Kelola</button></div>
+      ${['mahasiswa','asprak','aslab','dosen','admin'].map(r=>{
+        const n = state.users.filter(u=>u.role===r).length;
+        return `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;font-weight:600">${roleLabel(r)}</span><span class="badge badge-blue">${n}</span></div>`;
+      }).join('')}
+    </div>
+    <div class="card"><div class="card-header"><div class="card-title">Laporan Kerusakan Terbaru</div><button class="btn btn-outline btn-sm" onclick="navigate('kerusakan')">Lihat</button></div>
+      ${state.kerusakan.map(k=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><div style="font-size:13px;font-weight:600">${k.nama}</div><div style="font-size:12px;color:var(--text-muted)">${k.lab} • ${badgeStatus(k.status)}</div></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// === INVENTARIS (aslab + admin) ===
+pages['inventaris'] = function() {
+  const canEdit = ['aslab','admin'].includes(state.user.role);
+  return `
+  <div class="page-heading"><h1>Inventaris Aset</h1><p>Kelola seluruh aset dan peralatan laboratorium.</p></div>
+  <div class="filter-bar">
+    <input class="search-input" type="text" placeholder="🔍 Cari aset..." oninput="filterInventaris(this.value)">
+    ${canEdit?`<button class="btn btn-primary" onclick="modalTambahAset()">+ Tambah Aset</button>`:''}
+  </div>
+  <div class="card"><div class="table-wrap">
+    <table id="tbl-inventaris"><thead><tr><th>Kode</th><th>Nama Aset</th><th>Lab</th><th>Merk</th><th>Tahun</th><th>Kondisi</th><th>Status</th>${canEdit?'<th>Aksi</th>':''}</tr></thead><tbody>
+    ${state.inventaris.map(i=>`<tr>
+      <td><code style="font-family:'IBM Plex Mono';font-size:11px;background:#f0f4f8;padding:2px 6px;border-radius:4px">${i.kode}</code></td>
+      <td><b>${i.nama}</b></td><td>${i.lab}</td><td>${i.merk}</td><td>${i.tahun}</td>
+      <td>${badgeStatus(i.kondisi)}</td><td>${badgeStatus(i.status)}</td>
+      ${canEdit?`<td style="white-space:nowrap">
+        <button class="btn btn-sm btn-outline" onclick="modalEditAset(${i.id})">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="hapusAset(${i.id})" style="margin-left:4px">🗑️</button>
+      </td>`:''}
+    </tr>`).join('')}
+    </tbody></table>
+  </div></div>`;
+};
+function modalTambahAset() {
+  openModal('Tambah Aset Baru', `
+    <div class="form-row">
+      <div class="form-group"><label>Kode Aset</label><input type="text" id="f-kode" placeholder="RPL-PC-007"></div>
+      <div class="form-group"><label>Nama Aset</label><input type="text" id="f-nama" placeholder="Komputer Workstation"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Lab</label><select id="f-lab">${state.ruangan.map(r=>`<option>${r.nama}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Merk</label><input type="text" id="f-merk" placeholder="Lenovo"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Tahun</label><input type="number" id="f-tahun" value="2024"></div>
+      <div class="form-group"><label>Kondisi</label><select id="f-kondisi"><option>Baik</option><option>Rusak Ringan</option><option>Rusak</option></select></div>
+    </div>
+  `, `<button class="btn btn-outline" onclick="closeModalForce()">Batal</button><button class="btn btn-primary" onclick="simpanAset()">Simpan</button>`);
+}
+function simpanAset() {
+  const newId = Math.max(0, ...state.inventaris.map(i=>i.id)) + 1;
+  state.inventaris.push({
+    id: newId,
+    kode: document.getElementById('f-kode').value || 'NEW-'+newId,
+    nama: document.getElementById('f-nama').value || 'Aset Baru',
+    lab: document.getElementById('f-lab').value,
+    merk: document.getElementById('f-merk').value || '-',
+    tahun: +document.getElementById('f-tahun').value || 2024,
+    kondisi: document.getElementById('f-kondisi').value,
+    status: 'Tersedia',
+  });
+  closeModalForce(); navigate('inventaris'); toast('Aset berhasil ditambahkan!','success');
+}
+function modalEditAset(id) {
+  const a = state.inventaris.find(i=>i.id===id);
+  openModal('Edit Aset', `
+    <div class="form-row">
+      <div class="form-group"><label>Kode Aset</label><input type="text" id="ea-kode" value="${a.kode}"></div>
+      <div class="form-group"><label>Nama Aset</label><input type="text" id="ea-nama" value="${a.nama}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Merk</label><input type="text" id="ea-merk" value="${a.merk}"></div>
+      <div class="form-group"><label>Tahun</label><input type="number" id="ea-tahun" value="${a.tahun}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Kondisi</label><select id="ea-kondisi">${['Baik','Rusak Ringan','Rusak'].map(o=>`<option ${a.kondisi===o?'selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Status</label><select id="ea-status">${['Tersedia','Dipinjam','Tidak Tersedia'].map(o=>`<option ${a.status===o?'selected':''}>${o}</option>`).join('')}</select></div>
+    </div>
+  `, `<button class="btn btn-outline" onclick="closeModalForce()">Batal</button><button class="btn btn-primary" onclick="updateAset(${id})">Simpan</button>`);
+}
+function updateAset(id) {
+  const a = state.inventaris.find(i=>i.id===id);
+  a.kode = document.getElementById('ea-kode').value;
+  a.nama = document.getElementById('ea-nama').value;
+  a.merk = document.getElementById('ea-merk').value;
+  a.tahun = +document.getElementById('ea-tahun').value;
+  a.kondisi = document.getElementById('ea-kondisi').value;
+  a.status = document.getElementById('ea-status').value;
+  closeModalForce(); navigate('inventaris'); toast('Aset berhasil diperbarui!','success');
+}
+function hapusAset(id) { if(confirm('Hapus aset ini?')){ state.inventaris=state.inventaris.filter(i=>i.id!==id); navigate('inventaris'); toast('Aset dihapus.','warning'); } }
+function filterInventaris(q) {
+  document.querySelectorAll('#tbl-inventaris tbody tr').forEach(r => { r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none'; });
+}
+
+// === MATA KULIAH (admin dapat tambah/edit/hapus) ===
+pages['matkul'] = function() {
+  const canEdit = state.user.role === 'admin';
+  return `
+  <div class="page-heading"><h1>Mata Kuliah</h1><p>${canEdit?'Kelola daftar mata kuliah praktikum.':'Daftar mata kuliah praktikum.'}</p></div>
+  ${canEdit?`<div style="margin-bottom:16px"><button class="btn btn-primary" onclick="modalTambahMatkul()">${ic('plus')} Tambah Mata Kuliah</button></div>`:''}
+  <div class="card"><div class="table-wrap"><table>
+    <thead><tr><th>Kode</th><th>Nama Mata Kuliah</th><th>SKS</th><th>Dosen Pengampu</th>${canEdit?'<th>Aksi</th>':''}</tr></thead><tbody>
+    ${state.matkul.map(m=>`<tr>
+      <td><code style="font-size:11px">${m.kode}</code></td><td><b>${m.nama}</b></td><td>${m.sks}</td><td>${m.dosen}</td>
+      ${canEdit?`<td style="white-space:nowrap">
+        <button class="btn btn-sm btn-outline" onclick="modalEditMatkul(${m.id})">${ic('pencil')}</button>
+        <button class="btn btn-sm btn-danger" onclick="hapusMatkul(${m.id})" style="margin-left:4px">${ic('trash-2')}</button>
+      </td>`:''}
+    </tr>`).join('')}
+    </tbody></table></div></div>`;
+};
+function modalTambahMatkul() {
+  openModal('Tambah Mata Kuliah', `
+    <div class="form-row">
+      <div class="form-group"><label>Kode</label><input type="text" id="mk-kode" placeholder="TI304"></div>
+      <div class="form-group"><label>SKS</label><input type="number" id="mk-sks" value="3"></div>
+    </div>
+    <div class="form-group"><label>Nama Mata Kuliah</label><input type="text" id="mk-nama" placeholder="Basis Data"></div>
+    <div class="form-group"><label>Dosen Pengampu</label><select id="mk-dosen">${state.users.filter(u=>u.role==='dosen').map(d=>`<option>${d.nama}</option>`).join('')}</select></div>
+  `, `<button class="btn btn-outline" onclick="closeModalForce()">Batal</button><button class="btn btn-primary" onclick="simpanMatkul()">Simpan</button>`);
+}
+function simpanMatkul() {
+  state.matkul.push({ id: Date.now(), kode: document.getElementById('mk-kode').value, nama: document.getElementById('mk-nama').value, sks: +document.getElementById('mk-sks').value, dosen: document.getElementById('mk-dosen').value });
+  closeModalForce(); navigate('matkul'); toast('Mata kuliah ditambahkan!','success');
+}
+function modalEditMatkul(id) {
+  const m = state.matkul.find(x=>x.id===id);
+  openModal('Edit Mata Kuliah', `
+    <div class="form-row">
+      <div class="form-group"><label>Kode</label><input type="text" id="emk-kode" value="${m.kode}"></div>
+      <div class="form-group"><label>SKS</label><input type="number" id="emk-sks" value="${m.sks}"></div>
+    </div>
+    <div class="form-group"><label>Nama</label><input type="text" id="emk-nama" value="${m.nama}"></div>
+    <div class="form-group"><label>Dosen Pengampu</label><input type="text" id="emk-dosen" value="${m.dosen}"></div>
+  `, `<button class="btn btn-outline" onclick="closeModalForce()">Batal</button><button class="btn btn-primary" onclick="updateMatkul(${id})">Simpan</button>`);
+}
+function updateMatkul(id) {
+  const m = state.matkul.find(x=>x.id===id);
+  m.kode = document.getElementById('emk-kode').value; m.sks = +document.getElementById('emk-sks').value;
+  m.nama = document.getElementById('emk-nama').value; m.dosen = document.getElementById('emk-dosen').value;
+  closeModalForce(); navigate('matkul'); toast('Mata kuliah diperbarui!','success');
+}
+function hapusMatkul(id) { if(confirm('Hapus mata kuliah?')){ state.matkul=state.matkul.filter(m=>m.id!==id); navigate('matkul'); toast('Mata kuliah dihapus.','warning'); } }
+
+// === JADWAL ===
+pages['jadwal'] = function() {
+  const canEdit = false; // Admin & lainnya hanya boleh melihat jadwal
+  return `
+  <div class="page-heading"><h1>Jadwal Praktikum</h1></div>
+  ${canEdit?`<div style="margin-bottom:16px"><button class="btn btn-primary" onclick="modalTambahJadwal()">+ Tambah Jadwal</button></div>`:''}
+  <div class="card"><div class="table-wrap"><table>
+    <thead><tr><th>Mata Kuliah</th><th>Kelas</th><th>Lab</th><th>Hari</th><th>Jam</th><th>Dosen</th><th>Mhs</th>${canEdit?'<th>Aksi</th>':''}</tr></thead><tbody>
+    ${state.jadwal.map(j=>`<tr>
+      <td><b>${j.matkul}</b></td><td>${j.kelas}</td><td>${j.lab}</td><td>${j.hari}</td><td>${j.jam}</td><td>${j.dosen}</td>
+      <td><span class="badge badge-blue">${j.mahasiswa}</span></td>
+      ${canEdit?`<td><button class="btn btn-sm btn-danger" onclick="hapusJadwal(${j.id})">🗑️</button></td>`:''}
+    </tr>`).join('')}
+    </tbody></table></div></div>`;
+};
+function modalTambahJadwal() {
+  openModal('Tambah Jadwal', `
+    <div class="form-group"><label>Mata Kuliah</label><select id="jd-mk">${state.matkul.map(m=>`<option>${m.nama}</option>`).join('')}</select></div>
+    <div class="form-row">
+      <div class="form-group"><label>Kelas</label><input type="text" id="jd-kelas" placeholder="TI 2024 A"></div>
+      <div class="form-group"><label>Lab</label><select id="jd-lab">${state.ruangan.map(r=>`<option>${r.nama}</option>`).join('')}</select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Hari</label><select id="jd-hari"><option>Senin</option><option>Selasa</option><option>Rabu</option><option>Kamis</option><option>Jumat</option></select></div>
+      <div class="form-group"><label>Jam</label><input type="text" id="jd-jam" placeholder="08:00-10:00"></div>
+    </div>
+  `, `<button class="btn btn-outline" onclick="closeModalForce()">Batal</button><button class="btn btn-primary" onclick="simpanJadwal()">Simpan</button>`);
+}
+function simpanJadwal() {
+  state.jadwal.push({ id: Date.now(), matkul: document.getElementById('jd-mk').value, kelas: document.getElementById('jd-kelas').value, lab: document.getElementById('jd-lab').value, hari: document.getElementById('jd-hari').value, jam: document.getElementById('jd-jam').value, dosen: state.user.name, mahasiswa: 0 });
+  closeModalForce(); navigate('jadwal'); toast('Jadwal ditambahkan!','success');
+}
+function hapusJadwal(id) { if(confirm('Hapus jadwal?')){ state.jadwal=state.jadwal.filter(j=>j.id!==id); navigate('jadwal'); toast('Jadwal dihapus.','warning'); } }
+
+// === PEMINJAMAN (mahasiswa) ===
+pages['ajukan-peminjaman'] = function() {
+  return `
+  <div class="page-heading"><h1>Ajukan Peminjaman</h1><p>Ajukan peminjaman aset laboratorium.</p></div>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-title mb-4">📤 Form Peminjaman Alat/Aset</div>
+      <div class="form-group"><label>Pilih Aset</label><select id="pj-aset">${state.inventaris.filter(i=>i.status==='Tersedia').map(i=>`<option value="${i.id}">${i.nama} (${i.kode}) — ${i.lab}</option>`).join('')}</select></div>
+      <div class="form-row">
+        <div class="form-group"><label>Tanggal Pinjam</label><input type="date" id="pj-tgl" value="${new Date().toISOString().slice(0,10)}"></div>
+        <div class="form-group"><label>Tanggal Kembali</label><input type="date" id="pj-tgl2"></div>
+      </div>
+      <div class="form-group"><label>Keperluan</label><textarea id="pj-kep" rows="3" placeholder="Jelaskan keperluan peminjaman..."></textarea></div>
+      <button class="btn btn-primary btn-full" onclick="ajukanPeminjaman()">Ajukan Peminjaman</button>
+    </div>
+    <div class="card">
+      <div class="card-title mb-4">📋 Status Aset Tersedia</div>
+      ${state.inventaris.map(i=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:600">${i.nama}</div><div style="font-size:11px;color:var(--text-muted)">${i.kode} • ${i.lab}</div></div>${badgeStatus(i.status)}</div>`).join('')}
+    </div>
+  </div>`;
+};
+function ajukanPeminjaman() {
+  const asetId = +document.getElementById('pj-aset').value;
+  const aset = state.inventaris.find(i=>i.id===asetId);
+  state.peminjaman.push({
+    id: Date.now(), pemohon: state.user.name, nim: state.user.nim || '',
+    aset: aset.nama, lab: aset.lab,
+    tanggal: document.getElementById('pj-tgl').value,
+    kembali: document.getElementById('pj-tgl2').value,
+    status: 'Menunggu Validasi', verif: '',
+  });
+  navigate('riwayat-peminjaman'); toast('Peminjaman berhasil diajukan! Menunggu validasi dosen.','success');
+}
+
+// === BOOKING RUANG (mahasiswa) ===
+pages['booking-ruang'] = function() {
+  return `
+  <div class="page-heading"><h1>Booking Ruangan Lab</h1><p>Pesan ruangan laboratorium untuk kebutuhan kuliah atau tugas akhir.</p></div>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-title mb-4">🏢 Form Booking Ruangan</div>
+      <div class="form-group"><label>Ruangan</label><select id="br-ruang">${state.ruangan.filter(r=>r.status==='Tersedia').map(r=>`<option>${r.nama}</option>`).join('')}</select></div>
+      <div class="form-row">
+        <div class="form-group"><label>Tanggal</label><input type="date" id="br-tgl" value="${new Date().toISOString().slice(0,10)}"></div>
+        <div class="form-group"><label>Waktu</label><input type="text" id="br-waktu" placeholder="08:00-10:00"></div>
+      </div>
+      <div class="form-group"><label>Keperluan</label><textarea id="br-kep" rows="3" placeholder="Praktikum/Tugas Akhir..."></textarea></div>
+      <button class="btn btn-primary btn-full" onclick="bookingRuang()">Ajukan Booking</button>
+    </div>
+    <div class="card">
+      <div class="card-title mb-4">🏢 Status Ketersediaan Ruangan</div>
+      ${state.ruangan.map(r=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:14px;font-weight:600">${r.nama}</div><div style="font-size:12px;color:var(--text-muted)">${r.gedung} • Kapasitas ${r.kapasitas} orang</div></div>${badgeStatus(r.status)}</div>`).join('')}
+    </div>
+  </div>
+  <div class="card mt-4">
+    <div class="card-header"><div class="card-title">Riwayat Booking Ruangan</div></div>
+    <div class="table-wrap"><table><thead><tr><th>Pemohon</th><th>Ruangan</th><th>Tanggal</th><th>Waktu</th><th>Keperluan</th><th>Status</th></tr></thead><tbody>
+    ${state.bookingRuang.map(b=>`<tr><td>${b.pemohon}</td><td>${b.ruangan}</td><td>${b.tanggal}</td><td>${b.waktu}</td><td>${b.keperluan}</td><td>${badgeStatus(b.status)}</td></tr>`).join('')}
+    </tbody></table></div>
+  </div>`;
+};
+function bookingRuang() {
+  const ruang = document.getElementById('br-ruang').value;
+  const tgl = document.getElementById('br-tgl').value;
+  const waktu = document.getElementById('br-waktu').value;
+  if (!waktu) { toast('Lengkapi waktu booking!','error'); return; }
+  state.bookingRuang.push({ id: Date.now(), pemohon: state.user.name, ruangan: ruang, tanggal: tgl, waktu, keperluan: document.getElementById('br-kep').value || '-', status: 'Menunggu' });
+  navigate('booking-ruang'); toast('Booking ruangan berhasil diajukan!','success');
+}
+
+// === RIWAYAT / SEMUA PEMINJAMAN ===
+pages['riwayat-peminjaman'] = function() {
+  const isAll = state.user.role !== 'mahasiswa';
+  const data = isAll ? state.peminjaman : state.peminjaman.filter(p => p.pemohon === state.user.name);
+  return `
+  <div class="page-heading"><h1>${isAll?'Semua Peminjaman':'Riwayat Peminjaman'}</h1><p>${isAll?'Seluruh data peminjaman.':'Riwayat peminjaman Anda.'}</p></div>
+  <div class="card"><div class="table-wrap"><table>
+    <thead><tr><th>Pemohon</th><th>Aset</th><th>Lab</th><th>Tgl Pinjam</th><th>Tgl Kembali</th><th>Validator</th><th>Status</th></tr></thead><tbody>
+    ${data.map(p=>`<tr><td><b>${p.pemohon}</b></td><td>${p.aset}</td><td>${p.lab}</td><td>${p.tanggal}</td><td>${p.kembali}</td><td>${p.verif||'-'}</td><td>${badgeStatus(p.status)}</td></tr>`).join('')}
+    ${!data.length?'<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">Tidak ada data.</td></tr>':''}
+    </tbody></table></div></div>`;
+};
+pages['semua-peminjaman'] = pages['riwayat-peminjaman'];
+
+// === VALIDASI (dosen only) ===
+pages['validasi'] = function() {
+  if (state.user.role !== 'dosen') {
+    return `<div class="empty-state"><div class="icon">🔒</div><p>Hanya Dosen yang dapat melakukan validasi peminjaman.</p></div>`;
+  }
+  const pending = state.peminjaman.filter(p=>p.status==='Menunggu Validasi');
+  return `
+  <div class="page-heading"><h1>Validasi Peminjaman</h1><p>Periksa dan validasi permintaan peminjaman dari mahasiswa.</p></div>
+  <div class="card mb-4">
+    <div class="card-title mb-4">⏳ Menunggu Validasi (${pending.length})</div>
+    ${pending.length ? pending.map(p=>`
+      <div style="background:var(--bg);border-radius:var(--radius);padding:16px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+          <div>
+            <div style="font-size:14px;font-weight:700">${p.pemohon} <span style="font-size:12px;color:var(--text-muted)">(${p.nim})</span></div>
+            <div style="font-size:13px;margin-top:4px">Aset: <b>${p.aset}</b> — ${p.lab}</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Pinjam: ${p.tanggal} s/d ${p.kembali}</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-success btn-sm" onclick="validasiItem(${p.id},'Disetujui')">✓ Setujui</button>
+            <button class="btn btn-danger btn-sm" onclick="validasiItem(${p.id},'Ditolak')">✕ Tolak</button>
+          </div>
+        </div>
+      </div>`).join('') : '<div class="empty-state"><div class="icon">✅</div><p>Tidak ada peminjaman yang menunggu validasi.</p></div>'}
+  </div>
+  <div class="card">
+    <div class="card-title mb-4">📋 Riwayat Validasi</div>
+    <div class="table-wrap"><table><thead><tr><th>Pemohon</th><th>Aset</th><th>Tanggal</th><th>Validator</th><th>Status</th></tr></thead><tbody>
+    ${state.peminjaman.filter(p=>p.status==='Disetujui'||p.status==='Ditolak').map(p=>`<tr><td>${p.pemohon}</td><td>${p.aset}</td><td>${p.tanggal}</td><td>${p.verif||'-'}</td><td>${badgeStatus(p.status)}</td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">Belum ada riwayat.</td></tr>'}
+    </tbody></table></div>
+  </div>`;
+};
+function validasiItem(id, status) {
+  if (state.user.role !== 'dosen') { toast('Hanya Dosen yang dapat memvalidasi!','error'); return; }
+  const p = state.peminjaman.find(x=>x.id===id);
+  p.status = status; p.verif = state.user.name;
+  navigate('validasi');
+  renderSidebar(); // refresh badge real-time
+  toast(status === 'Disetujui' ? `Peminjaman ${p.pemohon} disetujui!` : `Peminjaman ${p.pemohon} ditolak.`, status==='Disetujui'?'success':'error');
+}
+
+// === ABSENSI ===
+pages['absensi'] = function() {
+  const canEdit = ['asprak'].includes(state.user.role);
+  const judul = state.user.role === 'dosen' ? 'Riwayat Absensi Praktikum' : 'Absensi Praktikum';
+  return `
+  <div class="page-heading"><h1>${judul}</h1></div>
+  ${canEdit ? `
+    <div class="card mb-4">
+      <div class="card-title mb-4">+ Input Absensi</div>
+      <div class="form-row">
+        <div class="form-group"><label>Mata Kuliah</label><select id="ab-mk">${state.matkul.map(m=>`<option>${m.nama}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Kelas</label><input type="text" id="ab-kelas" placeholder="TI 2024 B"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Tanggal</label><input type="date" id="ab-tgl" value="${new Date().toISOString().slice(0,10)}"></div>
+        <div class="form-group"><label>Jumlah Hadir</label><input type="number" id="ab-hadir" placeholder="35"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Izin</label><input type="number" id="ab-izin" value="0"></div>
+        <div class="form-group"><label>Alfa</label><input type="number" id="ab-alfa" value="0"></div>
+      </div>
+      <button class="btn btn-primary" onclick="simpanAbsensi()">Simpan Absensi</button>
+    </div>` : ''}
+  <div class="card">
+    <div class="card-title mb-4">Riwayat Absensi</div>
+    <div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Mata Kuliah</th><th>Kelas</th><th>Hadir</th><th>Izin</th><th>Alfa</th><th>Total</th></tr></thead><tbody>
+    ${state.absensi.map(a=>`<tr><td>${a.tanggal}</td><td><b>${a.matkul}</b></td><td>${a.kelas}</td><td><span class="badge badge-green">${a.hadir}</span></td><td><span class="badge badge-amber">${a.izin}</span></td><td><span class="badge badge-red">${a.alfa}</span></td><td>${a.total}</td></tr>`).join('')}
+    </tbody></table></div>
+  </div>`;
+};
+function simpanAbsensi() {
+  const hadir = +document.getElementById('ab-hadir').value || 0;
+  const izin = +document.getElementById('ab-izin').value || 0;
+  const alfa = +document.getElementById('ab-alfa').value || 0;
+  state.absensi.push({ id: Date.now(), tanggal: document.getElementById('ab-tgl').value, matkul: document.getElementById('ab-mk').value, kelas: document.getElementById('ab-kelas').value, hadir, izin, alfa, total: hadir+izin+alfa });
+  navigate('absensi'); toast('Absensi berhasil disimpan!','success');
+}
+
+// === NILAI ===
+pages['kelola-nilai'] = function() {
+  const canEdit = ['asprak','dosen'].includes(state.user.role);
+  return `
+  <div class="page-heading"><h1>Input/Kelola Nilai Praktikum</h1></div>
+  ${canEdit ? `<div style="margin-bottom:16px"><button class="btn btn-primary" onclick="modalTambahNilai()">+ Input Nilai Mahasiswa</button></div>` : ''}
+  <div class="card"><div class="table-wrap"><table>
+    <thead><tr><th>NIM</th><th>Nama</th><th>Mata Kuliah</th><th>M1</th><th>M2</th><th>M3</th><th>UAS</th><th>Rata-rata</th><th>Grade</th>${canEdit?'<th>Aksi</th>':''}</tr></thead><tbody>
+    ${state.nilai.map(n=>`<tr>
+      <td><code style="font-size:11px">${n.nim}</code></td><td><b>${n.nama}</b></td><td>${n.matkul}</td>
+      <td>${n.modul1}</td><td>${n.modul2}</td><td>${n.modul3}</td><td>${n.uas}</td>
+      <td><b>${((n.modul1+n.modul2+n.modul3+n.uas)/4).toFixed(1)}</b></td>
+      <td><span class="badge badge-green">${n.grade}</span></td>
+      ${canEdit?`<td><button class="btn btn-sm btn-outline" onclick="modalEditNilai(${n.id})">✏️</button></td>`:''}
+    </tr>`).join('')}
+    </tbody></table></div></div>`;
+};
+function modalTambahNilai() {
+  openModal('Input Nilai Mahasiswa', `
+    <div class="form-row">
+      <div class="form-group"><label>NIM</label><input type="text" id="nv-nim" placeholder="24051204xxx"></div>
+      <div class="form-group"><label>Nama</label><input type="text" id="nv-nama" placeholder="Nama Mahasiswa"></div>
+    </div>
+    <div class="form-group"><label>Mata Kuliah</label><select id="nv-mk">${state.matkul.map(m=>`<option>${m.nama}</option>`).join('')}</select></div>
+    <div class="form-row">
+      <div class="form-group"><label>Modul 1</label><input type="number" id="nv-m1" min="0" max="100" value="0"></div>
+      <div class="form-group"><label>Modul 2</label><input type="number" id="nv-m2" min="0" max="100" value="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Modul 3</label><input type="number" id="nv-m3" min="0" max="100" value="0"></div>
+      <div class="form-group"><label>UAS</label><input type="number" id="nv-uas" min="0" max="100" value="0"></div>
+    </div>
+  `, `<button class="btn btn-outline" onclick="closeModalForce()">Batal</button><button class="btn btn-primary" onclick="simpanNilai()">Simpan</button>`);
+}
+function simpanNilai() {
+  const m1=+document.getElementById('nv-m1').value, m2=+document.getElementById('nv-m2').value, m3=+document.getElementById('nv-m3').value, uas=+document.getElementById('nv-uas').value;
+  const avg = (m1+m2+m3+uas)/4;
+  const grade = avg>=85?'A':avg>=80?'A-':avg>=75?'B+':avg>=70?'B':avg>=65?'B-':'C+';
+  state.nilai.push({ id: Date.now(), nim: document.getElementById('nv-nim').value, nama: document.getElementById('nv-nama').value, matkul: document.getElementById('nv-mk').value, modul1:m1, modul2:m2, modul3:m3, uas, grade });
+  closeModalForce(); navigate('kelola-nilai'); toast('Nilai berhasil disimpan!','success');
+}
+function modalEditNilai(id) {
+  const n = state.nilai.find(x=>x.id===id);
+  openModal('Edit Nilai', `
+    <div class="form-group"><label>Nama</label><input type="text" value="${n.nama}" disabled style="background:#f0f4f8"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Modul 1</label><input type="number" id="en-m1" value="${n.modul1}"></div>
+      <div class="form-group"><label>Modul 2</label><input type="number" id="en-m2" value="${n.modul2}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Modul 3</label><input type="number" id="en-m3" value="${n.modul3}"></div>
+      <div class="form-group"><label>UAS</label><input type="number" id="en-uas" value="${n.uas}"></div>
+    </div>
+  `, `<button class="btn btn-outline" onclick="closeModalForce()">Batal</button><button class="btn btn-primary" onclick="updateNilai(${id})">Simpan</button>`);
+}
+function updateNilai(id) {
+  const n = state.nilai.find(x=>x.id===id);
+  n.modul1=+document.getElementById('en-m1').value; n.modul2=+document.getElementById('en-m2').value;
+  n.modul3=+document.getElementById('en-m3').value; n.uas=+document.getElementById('en-uas').value;
+  const avg=(n.modul1+n.modul2+n.modul3+n.uas)/4;
+  n.grade = avg>=85?'A':avg>=80?'A-':avg>=75?'B+':avg>=70?'B':avg>=65?'B-':'C+';
+  closeModalForce(); navigate('kelola-nilai'); toast('Nilai diperbarui!','success');
+}
+
+// === NILAI MAHASISWA ===
+pages['nilai-absensi'] = function() {
+  const myNilai = state.nilai.filter(n => n.nim === state.user.nim);
+  return `
+  <div class="page-heading"><h1>Nilai & Absensi Saya</h1></div>
+  <div class="grid grid-2">
+    <div class="card"><div class="card-title mb-4">📊 Nilai Praktikum</div>
+      ${myNilai.length ? myNilai.map(n=>`
+        <div style="background:var(--bg);border-radius:var(--radius);padding:16px;margin-bottom:10px">
+          <div style="font-size:15px;font-weight:700">${n.matkul}</div>
+          <div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap">
+            ${[['Modul 1',n.modul1],['Modul 2',n.modul2],['Modul 3',n.modul3],['UAS',n.uas]].map(([l,v])=>`<div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--navy)">${v}</div><div style="font-size:11px;color:var(--text-muted)">${l}</div></div>`).join('')}
+            <div style="text-align:center;margin-left:auto"><div style="font-size:24px;font-weight:700;color:var(--green)">${n.grade}</div><div style="font-size:11px;color:var(--text-muted)">Grade</div></div>
+          </div>
+        </div>`).join('') : '<div class="empty-state"><div class="icon">📊</div><p>Belum ada nilai.</p></div>'}
+    </div>
+    <div class="card"><div class="card-title mb-4">✅ Riwayat Absensi</div>
+      <div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Mata Kuliah</th><th>Status</th></tr></thead><tbody>
+      ${state.absensi.map(a=>`<tr><td>${a.tanggal}</td><td>${a.matkul}</td><td><span class="badge badge-green">Hadir</span></td></tr>`).join('')}
+      </tbody></table></div>
+    </div>
+  </div>`;
+};
+
+// === MODUL ===
+pages['modul'] = function() {
+  const canUpload = ['asprak','dosen'].includes(state.user.role);
+  return `
+  <div class="page-heading"><h1>Modul Praktikum</h1><p>${canUpload?'Unggah dan kelola modul pembelajaran.':'Unduh modul praktikum Anda.'}</p></div>
+  ${canUpload ? `
+    <div class="card mb-4">
+      <div class="card-title mb-4">📤 Unggah Modul Baru</div>
+      <div class="form-row">
+        <div class="form-group"><label>Judul Modul</label><input type="text" id="md-judul" placeholder="Modul 4 - REST API..."></div>
+        <div class="form-group"><label>Mata Kuliah</label><select id="md-mk">${state.matkul.map(m=>`<option>${m.nama}</option>`).join('')}</select></div>
+      </div>
+      <div class="form-group"><label>File Modul</label><input type="file" id="md-file" accept=".pdf,.doc,.docx"></div>
+      <button class="btn btn-primary" onclick="unggahModul()">📤 Unggah Modul</button>
+    </div>` : ''}
+  <div class="card">
+    <div class="card-title mb-4">Daftar Modul Tersedia</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+    ${state.modul.map(m=>`
+      <div style="display:flex;align-items:center;gap:16px;padding:14px;background:var(--bg);border-radius:var(--radius)">
+        <div style="width:44px;height:44px;background:#fef3c7;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px">📄</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700">${m.judul}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px">${m.matkul} • Dosen: ${m.dosen} • ${m.tanggal} • ${m.ukuran} • <b>${m.format||"PDF"}</b></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="unduhModul(${m.id})">⬇ Unduh</button>
+          ${canUpload?`<button class="btn btn-danger btn-sm" onclick="hapusModul(${m.id})">🗑️</button>`:''}
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+};
+function unggahModul() {
+  const judul = document.getElementById('md-judul').value.trim();
+  const mk = document.getElementById('md-mk').value;
+  const fileInput = document.getElementById('md-file');
+  const file = fileInput.files[0];
+  if (!judul) { toast('Lengkapi judul modul!','error'); return; }
+  if (!file) { toast('Pilih file modul terlebih dahulu!','error'); return; }
+  const ukuran = (file.size/(1024*1024)).toFixed(2)+' MB';
+  // Deteksi format dari ekstensi file aslinya
+  const ext = file.name.split('.').pop().toUpperCase();
+  // Baca file sebagai data URL agar bisa di-unduh ulang dengan format asli
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    state.modul.unshift({
+      id: Date.now(), judul, matkul: mk, dosen: state.user.name,
+      tanggal: new Date().toISOString().slice(0,10), ukuran, format: ext,
+      namaFile: file.name, mime: file.type || 'application/octet-stream',
+      dataUrl: ev.target.result
+    });
+    navigate('modul'); toast('Modul berhasil diunggah! ('+ext+')','success');
+  };
+  reader.readAsDataURL(file);
+}
+function hapusModul(id) { if(confirm('Hapus modul?')){ state.modul=state.modul.filter(m=>m.id!==id); navigate('modul'); toast('Modul dihapus.','warning'); } }
+function unduhModul(id) {
+  const m = state.modul.find(x=>x.id===id);
+  const a = document.createElement('a');
+  if (m.dataUrl) {
+    // File asli yang di-upload — unduh dengan format dan nama aslinya
+    a.href = m.dataUrl;
+    a.download = m.namaFile || (m.judul.replace(/[^a-z0-9]/gi,'_') + '.' + (m.format||'pdf').toLowerCase());
+  } else {
+    // Modul seed (belum punya dataUrl) — buat file dummy mengikuti format yg tertera
+    const ext = (m.format || 'PDF').toLowerCase();
+    let mime = 'application/octet-stream';
+    let content = `MODUL PRAKTIKUM\n\nJudul: ${m.judul}\nMata Kuliah: ${m.matkul}\nDosen: ${m.dosen}\nTanggal: ${m.tanggal}\n\n[Konten modul disimulasikan]`;
+    if (ext === 'pdf') {
+      mime = 'application/pdf';
+      // PDF minimal valid
+      content = '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Contents 4 0 R/Resources<</Font<</F1<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>>>>>>>endobj\n4 0 obj<</Length 80>>stream\nBT /F1 14 Tf 50 750 Td ('+JSON.stringify(m.judul)+') Tj ET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f\ntrailer<</Size 5/Root 1 0 R>>\n%%EOF';
+    } else if (ext === 'docx' || ext === 'doc') mime = 'application/msword';
+    const blob = new Blob([content], { type: mime });
+    a.href = URL.createObjectURL(blob);
+    a.download = m.judul.replace(/[^a-z0-9]/gi,'_') + '.' + ext;
+  }
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast('Mengunduh '+m.judul+'.'+(m.format||'PDF').toLowerCase()+'...','success');
+}
+
+// === KERUSAKAN ===
+pages['kerusakan'] = function() {
+  const canHandle = ['aslab','admin'].includes(state.user.role);
+  return `
+  <div class="page-heading"><h1>Laporan Kerusakan Aset</h1></div>
+  <div class="card mb-4">
+    <div class="card-title mb-4">🔧 Daftar Kerusakan</div>
+    <div class="table-wrap"><table><thead><tr><th>Kode</th><th>Nama Aset</th><th>Lab</th><th>Deskripsi</th><th>Dilaporkan</th><th>Oleh</th><th>Status</th>${canHandle?'<th>Aksi</th>':''}</tr></thead><tbody>
+    ${state.kerusakan.map(k=>`<tr>
+      <td><code style="font-size:11px">${k.kode}</code></td><td><b>${k.nama}</b></td><td>${k.lab}</td>
+      <td style="max-width:180px;font-size:12px">${k.deskripsi}</td><td>${k.dilaporkan}</td><td>${k.oleh}</td>
+      <td>${badgeStatus(k.status)}</td>
+      ${canHandle?`<td>${k.status!=='Selesai'?`<button class="btn btn-sm btn-success" onclick="tanganiKerusakan(${k.id})">✓ Tangani</button>`:'<span style="font-size:11px;color:var(--green)">✓ Selesai</span>'}</td>`:''}
+    </tr>`).join('')}
+    </tbody></table></div>
+  </div>`;
+};
+function tanganiKerusakan(id) {
+  const k = state.kerusakan.find(x=>x.id===id);
+  k.status = 'Selesai';
+  navigate('kerusakan');
+  alert(`✅ Kerusakan sudah ditangani!\n\nAset: ${k.nama}\nKode: ${k.kode}\nLab: ${k.lab}\n\nStatus telah diubah menjadi "Selesai".`);
+  toast('Kerusakan berhasil ditangani!','success');
+}
+
+pages['lapor-kerusakan'] = function() {
+  return `
+  <div class="page-heading"><h1>Lapor Kerusakan</h1></div>
+  <div class="card" style="max-width:600px">
+    <div class="form-group"><label>Kode Aset</label><select id="lk-kode">${state.inventaris.map(i=>`<option value="${i.kode}">${i.kode} — ${i.nama}</option>`).join('')}</select></div>
+    <div class="form-group"><label>Lab</label><select id="lk-lab">${state.ruangan.map(r=>`<option>${r.nama}</option>`).join('')}</select></div>
+    <div class="form-group"><label>Deskripsi Kerusakan</label><textarea id="lk-desc" rows="4" placeholder="Jelaskan kerusakan secara detail..."></textarea></div>
+    <button class="btn btn-primary btn-full" onclick="kirimLaporKerusakan()">📨 Kirim Laporan</button>
+  </div>`;
+};
+function kirimLaporKerusakan() {
+  const kode = document.getElementById('lk-kode').value;
+  const aset = state.inventaris.find(i=>i.kode===kode);
+  const desc = document.getElementById('lk-desc').value || '-';
+  const lab = document.getElementById('lk-lab').value;
+  state.kerusakan.push({ id: Date.now(), kode, nama: aset.nama, lab, deskripsi: desc, dilaporkan: new Date().toISOString().slice(0,10), oleh: state.user.name, status: 'Menunggu Teknisi' });
+  aset.kondisi='Rusak'; aset.status='Tidak Tersedia';
+  // Tambah notifikasi (titik merah muncul)
+  state.notifikasi.unshift({ id: Date.now(), judul: 'Laporan Kerusakan Terkirim', desc: aset.nama+' di '+lab+' telah dilaporkan.', waktu: 'Baru saja', dibaca: false });
+  renderNotifList();
+  // Pop-up modal pemberitahuan
+  openModal('✅ Laporan Terkirim', `
+    <div style="text-align:center;padding:14px 6px">
+      <div style="font-size:48px;margin-bottom:10px">📨</div>
+      <div style="font-size:16px;font-weight:700;color:var(--green);margin-bottom:8px">Laporan kerusakan berhasil dikirim!</div>
+      <div style="font-size:13px;color:var(--text-muted);line-height:1.6">
+        Aset: <b>${aset.nama}</b> (${kode})<br>
+        Lab: <b>${lab}</b><br>
+        Status: <b>Menunggu Teknisi</b>
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:12px">Tim teknisi akan segera menindaklanjuti laporan Anda.</div>
+    </div>
+  `, '<button class="btn btn-primary" onclick="closeModalForce()">OK, Mengerti</button>');
+  toast('Laporan kerusakan berhasil dikirim!','success');
+}
+
+// === INSIDEN ===
+pages['insiden'] = function() {
+  const canHandle = ['aslab','admin'].includes(state.user.role);
+  return `
+  <div class="page-heading"><h1>Laporan Insiden</h1></div>
+  <div class="card"><div class="table-wrap"><table>
+    <thead><tr><th>Judul</th><th>Lab</th><th>Tanggal</th><th>Dilaporkan</th><th>Deskripsi</th><th>Status</th>${canHandle?'<th>Aksi</th>':''}</tr></thead><tbody>
+    ${state.insiden.map(i=>`<tr>
+      <td><b>${i.judul}</b></td><td>${i.lab}</td><td>${i.tanggal}</td><td>${i.dilaporkan}</td>
+      <td style="font-size:12px;max-width:200px">${i.deskripsi}</td>
+      <td>${badgeStatus(i.status)}</td>
+      ${canHandle?`<td>${i.status!=='Ditangani'?`<button class="btn btn-sm btn-success" onclick="tanganiInsiden(${i.id})">✓ Tangani</button>`:'<span style="font-size:11px;color:var(--green)">✓ Ditangani</span>'}</td>`:''}
+    </tr>`).join('')}
+    </tbody></table></div></div>`;
+};
+function tanganiInsiden(id) {
+  const i = state.insiden.find(x=>x.id===id);
+  i.status = 'Ditangani';
+  navigate('insiden');
+  toast('Insiden berhasil ditangani!','success');
+}
+pages['lapor-insiden'] = function() {
+  return `
+  <div class="page-heading"><h1>Lapor Insiden</h1></div>
+  <div class="card" style="max-width:600px">
+    <div class="form-group"><label>Judul Insiden</label><input type="text" id="li-judul" placeholder="Kebocoran air / Korsleting / dll"></div>
+    <div class="form-group"><label>Lab</label><select id="li-lab">${state.ruangan.map(r=>`<option>${r.nama}</option>`).join('')}</select></div>
+    <div class="form-group"><label>Deskripsi Detail</label><textarea id="li-desc" rows="4"></textarea></div>
+    <button class="btn btn-warning btn-full" onclick="kirimInsiden()">⚠️ Laporkan Insiden</button>
+  </div>`;
+};
+function kirimInsiden() {
+  const judul = document.getElementById('li-judul').value || 'Insiden Baru';
+  const lab = document.getElementById('li-lab').value;
+  const desc = document.getElementById('li-desc').value || '-';
+  state.insiden.push({ id: Date.now(), judul, lab, deskripsi: desc, tanggal: new Date().toISOString().slice(0,10), dilaporkan: state.user.name, status: 'Dalam Penanganan' });
+  state.notifikasi.unshift({ id: Date.now(), judul: 'Laporan Insiden Terkirim', desc: judul+' di '+lab, waktu: 'Baru saja', dibaca: false });
+  renderNotifList();
+  openModal('✅ Laporan Terkirim', `
+    <div style="text-align:center;padding:14px 6px">
+      <div style="font-size:48px;margin-bottom:10px">⚠️</div>
+      <div style="font-size:16px;font-weight:700;color:var(--amber);margin-bottom:8px">Laporan insiden berhasil dikirim!</div>
+      <div style="font-size:13px;color:var(--text-muted);line-height:1.6">
+        Judul: <b>${judul}</b><br>
+        Lab: <b>${lab}</b><br>
+        Status: <b>Dalam Penanganan</b>
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:12px">Pengelola lab akan segera menindaklanjuti.</div>
+    </div>
+  `, '<button class="btn btn-primary" onclick="closeModalForce()">OK, Mengerti</button>');
+  toast('Laporan insiden terkirim!','success');
+}
+
+// === PEMELIHARAAN ===
+pages['pemeliharaan'] = function() {
+  const canEdit = ['aslab','admin'].includes(state.user.role);
+  return `
+  <div class="page-heading"><h1>Jadwal Pemeliharaan</h1></div>
+  ${canEdit ? `
+  <div class="card mb-4">
+    <div class="card-title mb-4">+ Tambah Jadwal Pemeliharaan</div>
+    <div class="form-row">
+      <div class="form-group"><label>Aset / Area</label><input type="text" id="pm-aset" placeholder="Semua Komputer Lab RPL"></div>
+      <div class="form-group"><label>Jenis Perawatan</label><input type="text" id="pm-jenis" placeholder="Pembersihan / Servis / Update"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Tanggal</label><input type="date" id="pm-tgl" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="form-group"><label>Teknisi/PIC</label><input type="text" id="pm-tek" placeholder="Tim IT Kampus"></div>
+    </div>
+    <button class="btn btn-primary" onclick="tambahPemeliharaan()">Simpan Jadwal</button>
+  </div>` : ''}
+  <div class="card">
+    <div class="card-title mb-4">Jadwal Aktif</div>
+    <div class="table-wrap"><table><thead><tr><th>Aset</th><th>Jenis</th><th>Tanggal</th><th>Teknisi</th><th>Status</th>${canEdit?'<th>Aksi</th>':''}</tr></thead><tbody>
+    ${state.pemeliharaan.map(p=>`<tr>
+      <td><b>${p.aset}</b></td><td>${p.jenis}</td><td>${p.tanggal}</td><td>${p.teknisi}</td>
+      <td>${badgeStatus(p.status)}</td>
+      ${canEdit?`<td>${p.status!=='Selesai'?`<button class="btn btn-sm btn-success" onclick="selesaiPemeliharaan(${p.id})">✓ Selesai</button>`:''}</td>`:''}
+    </tr>`).join('')}
+    </tbody></table></div>
+  </div>`;
+};
+function tambahPemeliharaan() {
+  const aset = document.getElementById('pm-aset').value.trim();
+  const jenis = document.getElementById('pm-jenis').value.trim();
+  const tgl = document.getElementById('pm-tgl').value;
+  const tek = document.getElementById('pm-tek').value.trim();
+  if (!aset || !jenis || !tgl) { toast('Lengkapi data aset, jenis, dan tanggal!','error'); return; }
+  state.pemeliharaan.push({ id: Date.now(), aset, jenis, tanggal: tgl, teknisi: tek || '-', status: 'Dijadwalkan' });
+  navigate('pemeliharaan'); toast('Jadwal pemeliharaan ditambahkan!','success');
+}
+function selesaiPemeliharaan(id) { state.pemeliharaan.find(p=>p.id===id).status='Selesai'; navigate('pemeliharaan'); toast('Pemeliharaan ditandai selesai!','success'); }
+pages['riwayat-pemeliharaan'] = function() {
+  return `
+  <div class="page-heading"><h1>Riwayat Pemeliharaan</h1></div>
+  <div class="card"><div class="table-wrap"><table>
+    <thead><tr><th>Aset</th><th>Jenis</th><th>Tanggal</th><th>Teknisi</th><th>Status</th></tr></thead><tbody>
+    ${state.pemeliharaan.map(p=>`<tr><td><b>${p.aset}</b></td><td>${p.jenis}</td><td>${p.tanggal}</td><td>${p.teknisi}</td><td>${badgeStatus(p.status)}</td></tr>`).join('')}
+    </tbody></table></div></div>`;
+};
+
+// === LAPORAN ===
+pages['laporan'] = function() {
+  const total = state.peminjaman.length;
+  const disetujui = state.peminjaman.filter(p=>p.status==='Disetujui').length;
+  const ditolak = state.peminjaman.filter(p=>p.status==='Ditolak').length;
+  return `
+  <div class="page-heading"><h1>Laporan & Statistik</h1></div>
+  <div class="grid grid-4 mb-6">
+    <div class="stat-card"><div class="stat-icon blue">📤</div><div><div class="stat-value">${total}</div><div class="stat-label">Total Peminjaman</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-value">${disetujui}</div><div class="stat-label">Disetujui</div></div></div>
+    <div class="stat-card"><div class="stat-icon red">❌</div><div><div class="stat-value">${ditolak}</div><div class="stat-label">Ditolak</div></div></div>
+    <div class="stat-card"><div class="stat-icon amber">🔧</div><div><div class="stat-value">${state.kerusakan.length}</div><div class="stat-label">Laporan Kerusakan</div></div></div>
+  </div>
+  <div class="grid grid-2">
+    <div class="card"><div class="card-title mb-4">Statistik Inventaris per Lab</div>
+      ${[...new Set(state.inventaris.map(i=>i.lab))].map(lab=>{
+        const t = state.inventaris.filter(i=>i.lab===lab).length;
+        const r = state.inventaris.filter(i=>i.lab===lab&&i.kondisi==='Rusak').length;
+        return `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:600">${lab}</div><div style="font-size:11px;color:var(--text-muted)">${t} aset total</div></div><div style="display:flex;gap:6px">${r?`<span class="badge badge-red">${r} rusak</span>`:''}<span class="badge badge-green">${t-r} baik</span></div></div>`;
+      }).join('')}
+    </div>
+    <div class="card"><div class="card-title mb-4">Statistik Pengguna</div>
+      ${['mahasiswa','asprak','aslab','dosen','admin'].map(r=>{
+        const n = state.users.filter(u=>u.role===r).length;
+        return `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;font-weight:600">${roleLabel(r)}</span><span class="badge badge-blue">${n} orang</span></div>`;
+      }).join('')}
+    </div>
+  </div>`;
+};
+
+// === MANAJEMEN USER (admin) ===
+pages['manajemen-user'] = function() {
+  return `
+  <div class="page-heading"><h1>Manajemen Pengguna</h1><p>Kelola akun, hak akses, dan status semua pengguna.</p></div>
+  <div style="margin-bottom:16px;display:flex;gap:10px">
+    <button class="btn btn-primary" onclick="modalTambahUser()">+ Tambah Pengguna</button>
+  </div>
+  <div class="card"><div class="table-wrap"><table>
+    <thead><tr><th>Nama</th><th>Email</th><th>NIM/NIP</th><th>Peran</th><th>Status</th><th>Aksi</th></tr></thead><tbody>
+    ${state.users.map(u=>`<tr>
+      <td><b>${u.nama}</b></td><td>${u.email}</td><td><code style="font-size:11px">${u.noid}</code></td>
+      <td><span class="badge ${u.role==='mahasiswa'?'badge-blue':u.role==='dosen'?'badge-green':u.role==='admin'?'badge-amber':'badge-gray'}">${roleLabel(u.role)}</span></td>
+      <td><span class="badge ${u.status==='Aktif'?'badge-green':'badge-red'}">${u.status}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-sm btn-outline" onclick="modalEditUser(${u.id})">✏️ Edit</button>
+        <button class="btn btn-sm ${u.status==='Aktif'?'btn-warning':'btn-success'}" onclick="toggleUserStatus(${u.id})" style="margin-left:4px">${u.status==='Aktif'?'⊘ Nonaktifkan':'✓ Aktifkan'}</button>
+        <button class="btn btn-sm btn-danger" onclick="hapusUser(${u.id})" style="margin-left:4px">🗑️</button>
+      </td>
+    </tr>`).join('')}
+    </tbody></table></div></div>`;
+};
+function modalTambahUser() {
+  openModal('Tambah Pengguna Baru', `
+    <div class="form-group"><label>Nama Lengkap</label><input type="text" id="u-nama" placeholder="Nama lengkap"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Email</label><input type="email" id="u-email" placeholder="user@unesa.ac.id"></div>
+      <div class="form-group"><label>NIM/NIP</label><input type="text" id="u-noid" placeholder="240512xxx atau 19xxx"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Peran</label><select id="u-role"><option value="mahasiswa">Mahasiswa</option><option value="asprak">Asisten Praktikum</option><option value="aslab">Asisten Lab</option><option value="dosen">Dosen</option><option value="admin">Admin</option></select></div>
+      <div class="form-group"><label>Status</label><select id="u-status"><option>Aktif</option><option>Nonaktif</option></select></div>
+    </div>
+    <div class="form-group"><label>Password Awal</label><input type="text" id="u-pwd" value="password123"></div>
+  `, `<button class="btn btn-outline" onclick="closeModalForce()">Batal</button><button class="btn btn-primary" onclick="simpanUser()">Simpan</button>`);
+}
+function simpanUser() {
+  const nama = document.getElementById('u-nama').value.trim();
+  const email = document.getElementById('u-email').value.trim();
+  if (!nama || !email) { toast('Lengkapi nama dan email!','error'); return; }
+  state.users.push({ id: Date.now(), nama, email, noid: document.getElementById('u-noid').value || '-', role: document.getElementById('u-role').value, status: document.getElementById('u-status').value });
+  closeModalForce(); navigate('manajemen-user'); toast('Pengguna ditambahkan!','success');
+}
+function modalEditUser(id) {
+  const u = state.users.find(x=>x.id===id);
+  openModal('Edit Pengguna', `
+    <div class="form-group"><label>Nama Lengkap</label><input type="text" id="eu-nama" value="${u.nama}"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Email</label><input type="email" id="eu-email" value="${u.email}"></div>
+      <div class="form-group"><label>NIM/NIP</label><input type="text" id="eu-noid" value="${u.noid}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Peran</label><select id="eu-role">${['mahasiswa','asprak','aslab','dosen','admin'].map(r=>`<option value="${r}" ${u.role===r?'selected':''}>${roleLabel(r)}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Status</label><select id="eu-status"><option ${u.status==='Aktif'?'selected':''}>Aktif</option><option ${u.status==='Nonaktif'?'selected':''}>Nonaktif</option></select></div>
+    </div>
+  `, `<button class="btn btn-outline" onclick="closeModalForce()">Batal</button><button class="btn btn-primary" onclick="updateUser(${id})">Simpan</button>`);
+}
+function updateUser(id) {
+  const u = state.users.find(x=>x.id===id);
+  u.nama = document.getElementById('eu-nama').value;
+  u.email = document.getElementById('eu-email').value;
+  u.noid = document.getElementById('eu-noid').value;
+  u.role = document.getElementById('eu-role').value;
+  u.status = document.getElementById('eu-status').value;
+  closeModalForce(); navigate('manajemen-user'); toast('Pengguna diperbarui!','success');
+}
+function toggleUserStatus(id) {
+  const u = state.users.find(x=>x.id===id);
+  u.status = u.status === 'Aktif' ? 'Nonaktif' : 'Aktif';
+  navigate('manajemen-user');
+  toast(`Pengguna ${u.nama} sekarang ${u.status}.`, u.status==='Aktif'?'success':'warning');
+}
+function hapusUser(id) {
+  if (confirm('Hapus pengguna ini?')) {
+    state.users = state.users.filter(u=>u.id!==id);
+    navigate('manajemen-user'); toast('Pengguna dihapus.','warning');
+  }
+}
+
+// === RUANGAN ===
+pages['ruangan'] = function() {
+  const canEdit = ['aslab'].includes(state.user.role);
+  return `
+  <div class="page-heading"><h1>Data Ruangan</h1></div>
+  ${canEdit?`<div style="margin-bottom:16px"><button class="btn btn-primary" onclick="modalTambahRuang()">+ Tambah Ruangan</button></div>`:''}
+  <div class="grid grid-3">
+    ${state.ruangan.map(r=>`
+      <div class="card">
+        <div style="font-size:28px;margin-bottom:12px">🏢</div>
+        <div style="font-size:16px;font-weight:700">${r.nama}</div>
+        <div style="font-size:13px;color:var(--text-muted);margin:4px 0">${r.gedung}</div>
+        <div style="font-size:13px;margin-bottom:12px">Kapasitas: <b>${r.kapasitas} orang</b></div>
+        ${badgeStatus(r.status)}
+        ${canEdit?`<div style="margin-top:12px;display:flex;gap:8px"><button class="btn btn-sm btn-outline" onclick="toggleRuangan(${r.id})">Ubah Status</button></div>`:''}
+      </div>`).join('')}
+  </div>`;
+};
+function modalTambahRuang() {
+  openModal('Tambah Ruangan', `
+    <div class="form-group"><label>Nama Ruangan</label><input type="text" id="nr-nama" placeholder="Lab Sistem Informasi"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Gedung</label><input type="text" id="nr-gedung" placeholder="T4 Lt. 2"></div>
+      <div class="form-group"><label>Kapasitas</label><input type="number" id="nr-kap" value="30"></div>
+    </div>
+  `, `<button class="btn btn-outline" onclick="closeModalForce()">Batal</button><button class="btn btn-primary" onclick="simpanRuangan()">Simpan</button>`);
+}
+function simpanRuangan() {
+  state.ruangan.push({ id: Date.now(), nama: document.getElementById('nr-nama').value, gedung: document.getElementById('nr-gedung').value, kapasitas: +document.getElementById('nr-kap').value, status: 'Tersedia' });
+  closeModalForce(); navigate('ruangan'); toast('Ruangan ditambahkan!','success');
+}
+function toggleRuangan(id) { const r = state.ruangan.find(x=>x.id===id); r.status = r.status === 'Tersedia' ? 'Terpakai' : 'Tersedia'; navigate('ruangan'); }
+
+// === PROFIL ===
+pages['profil'] = function() {
+  const u = state.user;
+  const avatarHtml = u.photo
+    ? `<img src="${u.photo}" alt="foto" style="width:96px;height:96px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 16px;border:3px solid var(--blue)">`
+    : `<div id="pf-avatar-letter" style="width:96px;height:96px;border-radius:50%;background:var(--blue);color:#fff;font-size:36px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">${u.name.charAt(0)}</div>`;
+  return `
+  <div class="page-heading"><h1>Profil Saya</h1><p>Kelola informasi akun & foto profil Anda.</p></div>
+  <div class="grid grid-2">
+    <div class="card"><div style="text-align:center;padding:20px 0">
+      ${avatarHtml}
+      <div style="font-size:20px;font-weight:700" id="pf-view-name">${u.name}</div>
+      <div style="color:var(--text-muted);margin-top:4px">${roleLabel(u.role)}</div>
+      ${u.nim?`<div style="font-size:13px;margin-top:4px">NIM: ${u.nim}</div>`:''}
+      ${u.nip?`<div style="font-size:13px;margin-top:4px">NIP: ${u.nip}</div>`:''}
+      <div style="font-size:13px;color:var(--text-muted);margin-top:4px" id="pf-view-email">${u.email}</div>
+      <div style="margin-top:18px">
+        <label class="btn btn-outline btn-sm" style="cursor:pointer">
+          📷 Ganti Foto Profil
+          <input type="file" accept="image/*" style="display:none" onchange="gantiFotoProfil(event)">
+        </label>
+        ${u.photo?`<button class="btn btn-danger btn-sm" style="margin-left:6px" onclick="hapusFotoProfil()">🗑️ Hapus Foto</button>`:''}
+      </div>
+    </div></div>
+    <div class="card">
+      <div class="card-title mb-4">Edit Profil</div>
+      <div class="form-group"><label>Nama Lengkap</label><input type="text" id="pf-nama" value="${u.name}" oninput="liveUpdateNama(this.value)"></div>
+      <div class="form-group"><label>Email</label><input type="email" value="${u.email}" disabled style="background:#f0f4f8"></div>
+      <div class="form-group"><label>Password Baru</label><input type="password" id="pf-pwd1" placeholder="Kosongkan jika tidak diubah"></div>
+      <div class="form-group"><label>Konfirmasi Password</label><input type="password" id="pf-pwd2"></div>
+      <button class="btn btn-primary" onclick="simpanProfil()">💾 Simpan Perubahan</button>
+    </div>
+  </div>`;
+};
+function liveUpdateNama(val) {
+  // Real-time: kartu profil & sidebar mengikuti perubahan saat user mengetik
+  const trimmed = val.trim() || state.user.name;
+  state.user.name = trimmed;
+  const v = document.getElementById('pf-view-name'); if (v) v.textContent = trimmed;
+  const sn = document.getElementById('sidebar-name'); if (sn) sn.textContent = trimmed;
+  const sa = document.getElementById('sidebar-avatar');
+  if (sa && !state.user.photo) sa.textContent = trimmed.charAt(0);
+  const al = document.getElementById('pf-avatar-letter');
+  if (al && !state.user.photo) al.textContent = trimmed.charAt(0);
+  // Sinkron ke daftar users (manajemen pengguna)
+  const ud = state.users.find(x => x.email === state.user.email);
+  if (ud) ud.nama = trimmed;
+}
+function gantiFotoProfil(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { toast('File harus berupa gambar!','error'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    state.user.photo = e.target.result;
+    // Sidebar avatar -> ganti dengan img
+    const sa = document.getElementById('sidebar-avatar');
+    if (sa) {
+      sa.style.backgroundImage = `url(${e.target.result})`;
+      sa.style.backgroundSize = 'cover';
+      sa.style.backgroundPosition = 'center';
+      sa.style.color = 'transparent';
+    }
+    navigate('profil');
+    toast('Foto profil berhasil diperbarui!','success');
+  };
+  reader.readAsDataURL(file);
+}
+function hapusFotoProfil() {
+  state.user.photo = null;
+  const sa = document.getElementById('sidebar-avatar');
+  if (sa) {
+    sa.style.backgroundImage = '';
+    sa.style.color = '';
+    sa.textContent = state.user.name.charAt(0);
+  }
+  navigate('profil');
+  toast('Foto profil dihapus.','warning');
+}
+function simpanProfil() {
+  const nama = document.getElementById('pf-nama').value.trim();
+  const p1 = document.getElementById('pf-pwd1').value;
+  const p2 = document.getElementById('pf-pwd2').value;
+  if (!nama) { toast('Nama tidak boleh kosong!','error'); return; }
+  if (p1 || p2) {
+    if (p1 !== p2) { toast('Password dan konfirmasi tidak sama!','error'); return; }
+    if (p1.length < 6) { toast('Password minimal 6 karakter!','error'); return; }
+    // Update password account
+    if (accounts[state.user.role]) accounts[state.user.role].password = p1;
+    toast('Password berhasil diperbarui!','success');
+  }
+  state.user.name = nama;
+  const ud = state.users.find(x => x.email === state.user.email);
+  if (ud) ud.nama = nama;
+  document.getElementById('sidebar-name').textContent = nama;
+  toast('Profil berhasil disimpan!','success');
+}
+
+// === BADGE HELPER ===
+function badgeStatus(s) {
+  const map = {
+    'Tersedia':'badge-green','Baik':'badge-green','Disetujui':'badge-green','Selesai':'badge-green','Ditangani':'badge-green','Aktif':'badge-green',
+    'Dipinjam':'badge-blue','Dalam Perbaikan':'badge-blue','Dijadwalkan':'badge-blue',
+    'Menunggu Validasi':'badge-amber','Menunggu':'badge-amber','Menunggu Teknisi':'badge-amber','Dalam Penanganan':'badge-amber','Terpakai':'badge-amber',
+    'Rusak':'badge-red','Tidak Tersedia':'badge-red','Ditolak':'badge-red','Nonaktif':'badge-red',
+  };
+  return `<span class="badge ${map[s] || 'badge-gray'}">${s}</span>`;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') doLogin();
+});
+
+// Auto-set login email when role changes
+window.addEventListener("load", () => { if (window.lucide && window.lucide.createIcons) window.lucide.createIcons(); });
+document.getElementById("login-role").addEventListener('change', e => {
+  document.getElementById('login-email').value = accounts[e.target.value].email;
+});
+</script>
+</body>
+</html>

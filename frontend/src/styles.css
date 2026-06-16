@@ -1,0 +1,52 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; background: #f5f7fb; color: #1f2937; }
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; font-family: inherit; }
+
+.app-shell { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+.sidebar { background: linear-gradient(180deg,#1e3a8a,#1e40af); color: #fff; padding: 20px 16px; }
+.sidebar h1 { font-size: 18px; margin: 0 0 24px; }
+.sidebar nav a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #cbd5e1; margin-bottom: 4px; position: relative; }
+.sidebar nav a.router-link-active { background: rgba(255,255,255,.12); color: #fff; }
+.nav-badge { background: #ef4444; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 999px; margin-left: auto; }
+.user-mini { display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(0,0,0,.15); border-radius: 10px; margin-bottom: 18px; }
+.user-mini img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: #94a3b8; }
+.user-mini .nm { font-weight: 600; font-size: 14px; }
+.user-mini .rl { font-size: 11px; opacity: .75; text-transform: capitalize; }
+
+.main { display: flex; flex-direction: column; }
+.topbar { background: #fff; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; }
+.topbar h2 { margin: 0; font-size: 18px; }
+.notif-btn { position: relative; background: transparent; border: 0; font-size: 22px; }
+.notif-dot { position: absolute; top: 2px; right: 2px; width: 10px; height: 10px; background: #ef4444; border-radius: 50%; border: 2px solid #fff; }
+.content { padding: 24px; }
+
+.card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.05); margin-bottom: 16px; }
+.btn { background: #1e40af; color: #fff; border: 0; padding: 10px 16px; border-radius: 8px; font-weight: 500; }
+.btn.secondary { background: #6b7280; }
+.btn.danger { background: #dc2626; }
+.btn.success { background: #16a34a; }
+.input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; font-family: inherit; }
+label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+.form-row { margin-bottom: 14px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
+th { background: #f3f4f6; font-weight: 600; }
+
+.modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; z-index: 50; }
+.modal { background: #fff; border-radius: 12px; padding: 24px; max-width: 440px; width: 90%; }
+.modal h3 { margin-top: 0; }
+.modal .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+.notif-panel { position: absolute; top: 56px; right: 24px; width: 360px; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.12); padding: 12px; z-index: 40; }
+.notif-item { padding: 10px; border-radius: 8px; border-bottom: 1px solid #f1f5f9; }
+.notif-item.unread { background: #eff6ff; }
+.notif-item .t { font-weight: 600; font-size: 13px; }
+.notif-item .m { font-size: 12px; color: #475569; }
+
+.badge { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+.badge.menunggu { background: #fef3c7; color: #92400e; }
+.badge.disetujui, .badge.selesai { background: #dcfce7; color: #166534; }
+.badge.ditolak { background: #fee2e2; color: #991b1b; }
+.badge.dilaporkan { background: #dbeafe; color: #1e40af; }
+.badge.ditangani { background: #e0e7ff; color: #3730a3; }
